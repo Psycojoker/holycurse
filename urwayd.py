@@ -2,6 +2,7 @@
 # -*- coding:Utf-8 -*-
 
 import urwid
+import louie
 import tdd
 
 from datetime import datetime, timedelta
@@ -72,17 +73,31 @@ class Window(object):
 
         self.loop = urwid.MainLoop(self.frame, palette, input_filter=self.show_all_input, unhandled_input=self.manage_input)
         self.state = "main"
-        #self.init_signals()
+        self.init_signals()
 
-    #def init_signals(self):
-        #signal.
+    def exit(self):
+        raise urwid.ExitMainLoop()
 
-    def update_main_view(self, position):
+    def init_signals(self):
+        louie.connect(self.go_up,                      "k_main")
+        louie.connect(self.go_down,                    "j_main")
+        louie.connect(self.exit,                       "q_main")
+        louie.connect(self.command_line,               ":_main")
+        louie.connect(self.tickle_one_day,             "+_main")
+        louie.connect(self.at_todo_to_current_context, "a_main")
+        louie.connect(self.toggle_n_recreate,          "R_main")
+        louie.connect(self.toggle_todo,                " _main")
+        louie.connect(self.due_today,                  "t_main")
+        louie.connect(self.due_today,                  "T_main")
+        louie.connect(self.due_today,                  "w_main")
+        louie.connect(self.update_main_view,           "update_main")
+
+    def update_main_view(self):
         self.content = self.fill_main_view()
         self.listbox = urwid.ListBox(self.content)
         self.frame.set_body(self.listbox)
         # will fail with divider
-        self.content.set_focus(position)
+        self.content.set_focus(self.position)
 
     def fill_main_view(self):
         main_view = []
@@ -118,7 +133,7 @@ class Window(object):
         return input
 
     def manage_input(self, input):
-        position = self.content.get_focus()[1]
+        self.position = self.content.get_focus()[1]
         if self.frame.focus_part == "footer":
             # TODO refatorer ça
             if input == "enter" and self.state == "add todo":
@@ -130,7 +145,7 @@ class Window(object):
                     tdd.TodoDB().add_todo(todo_description, context=context)
                 self.footer.get_focus().edit_text = ""
                 self.footer.get_focus().set_caption("")
-                self.update_main_view(position)
+                louie.send("update_main")
                 self.state = "main"
 
             elif input == "enter" and self.state == "command":
@@ -140,67 +155,28 @@ class Window(object):
                 self.state = "main"
 
         else:
-            if input == 'k' and position > 1:
-                self.go_up(position)
+            louie.send("%s_%s" % (input, self.state))
+            self.show_key.set_text(input)
 
-            elif input == 'j':
-                self.go_down(position)
-
-            elif input == 'q':
-                raise urwid.ExitMainLoop()
-
-            elif input == ':':
-                self.command_line()
-
-            elif input == "+":
-                self.tickle_one_day(position)
-
-            elif input == "a":
-                self.at_todo_to_current_context()
-
-            elif input == "é":
-                self.frame.set_body(self.listbox)
-
-            elif input == "&":
-                self.frame.set_body(urwid.ListBox(urwid.SimpleListWalker([urwid.Text("wééé, change ton body")])))
-
-            elif input == "R":
-                self.toggle_n_recreate(position)
-
-            elif input == " ":
-                self.toggle_todo(position)
-
-            elif input == "t":
-                self.due_today(position)
-
-            elif input == "T":
-                self.due_today(position, 4)
-
-            elif input == "w":
-                self.due_today(position, 8)
-
-            else:
-                self.show_key.set_text(input)
-
-    def due_today(self, position, days=1):
+    def due_today(self, days=1):
         if isinstance(self.content.get_focus()[0].original_widget, TodoWidget):
             self.content.get_focus()[0].original_widget.due_today(days)
-        self.update_main_view(position)
+        louie.send("update_main")
 
-    def tickle_one_day(self, position):
+    def tickle_one_day(self):
         if isinstance(self.content.get_focus()[0].original_widget, TodoWidget):
             self.content.get_focus()[0].original_widget.item.tickle(datetime.now() + timedelta(days=1))
-        self.update_main_view(position)
+        louie.send("update_main")
 
-    def toggle_todo(self, position):
+    def toggle_todo(self):
         self.content.get_focus()[0].original_widget.activate()
-        self.update_main_view(position)
+        louie.send("update_main")
 
-    def toggle_n_recreate(self, position):
+    def toggle_n_recreate(self):
         todo = self.content.get_focus()[0].original_widget
         todo.activate()
         tdd.TodoDB().add_todo(todo.item.description, context=todo.get_context())
-        self.update_main_view(position)
+        louie.send("update_main")
 
     def at_todo_to_current_context(self):
         self.frame.set_focus('footer')
@@ -212,19 +188,20 @@ class Window(object):
         self.frame.get_footer().get_focus().insert_text(":")
         self.state = "command"
 
-    def go_down(self, position):
-        self.content.set_focus(position + 1)
+    def go_down(self):
+        self.content.set_focus(self.position + 1)
         self.show_key.set_text("Current: %s" % self.content.get_focus()[0].original_widget)
         if isinstance(self.content.get_focus()[0].original_widget, urwid.Divider):
-            self.content.set_focus(position + 3)
+            self.content.set_focus(self.position + 3)
             self.show_key.set_text("Gotcha !")
 
-    def go_up(self, position):
-        self.content.set_focus(position - 1)
-        self.show_key.set_text("Current: %s" % self.content.get_focus()[0].original_widget)
-        if isinstance(self.content.get_focus()[0].original_widget, ContextWidget):
-            self.content.set_focus(position - 3)
-            self.show_key.set_text("Gotcha !")
+    def go_up(self):
+        if self.position > 1:
+            self.content.set_focus(self.position - 1)
+            self.show_key.set_text("Current: %s" % self.content.get_focus()[0].original_widget)
+            if isinstance(self.content.get_focus()[0].original_widget, ContextWidget):
+                self.content.set_focus(self.position - 3)
+                self.show_key.set_text("Gotcha !")
 
 if __name__ == "__main__":
     Window().run()
