@@ -136,8 +136,8 @@ class Window(object):
 
     def manage_input(self, input):
         self.position = self.content.get_focus()[1]
-        louie.send("%s_%s" % (input, self.state))
-        self.show_key.set_text(input)
+        if not louie.send("%s_%s" % (input, self.state)):
+            self.show_key.set_text(input)
 
     def get_command(self):
         self.frame.set_focus('body')
