@@ -135,7 +135,7 @@ class Window(object):
         return input
 
     def manage_input(self, input):
-        self.position = self.content.get_focus()[1]
+        self.position = self.frame.get_body().get_focus()[1]
         if not louie.send("%s_%s" % (input, self.state)):
             self.show_key.set_text(input)
 
@@ -149,7 +149,7 @@ class Window(object):
         self.frame.set_focus('body')
         self.show_key.set_text("Todo description: " + self.footer.get_focus().edit_text)
         todo_description = self.footer.get_focus().edit_text
-        context = self.content.get_focus()[0].original_widget.get_context()
+        context = self.frame.get_body().get_focus()[0].original_widget.get_context()
         if todo_description.strip():
             tdd.TodoDB().add_todo(todo_description, context=context)
         self.footer.get_focus().edit_text = ""
@@ -158,21 +158,21 @@ class Window(object):
         self.state = "main"
 
     def due_today(self, days=1):
-        if isinstance(self.content.get_focus()[0].original_widget, TodoWidget):
-            self.content.get_focus()[0].original_widget.due_today(days)
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
+            self.frame.get_body().get_focus()[0].original_widget.due_today(days)
         louie.send("update_main")
 
     def tickle_one_day(self):
-        if isinstance(self.content.get_focus()[0].original_widget, TodoWidget):
-            self.content.get_focus()[0].original_widget.item.tickle(datetime.now() + timedelta(days=1))
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
+            self.frame.get_body().get_focus()[0].original_widget.item.tickle(datetime.now() + timedelta(days=1))
         louie.send("update_main")
 
     def toggle_todo(self):
-        self.content.get_focus()[0].original_widget.activate()
+        self.frame.get_body().get_focus()[0].original_widget.activate()
         louie.send("update_main")
 
     def toggle_n_recreate(self):
-        todo = self.content.get_focus()[0].original_widget
+        todo = self.frame.get_body().get_focus()[0].original_widget
         todo.activate()
         tdd.TodoDB().add_todo(todo.item.description, context=todo.get_context())
         louie.send("update_main")
@@ -188,18 +188,18 @@ class Window(object):
         self.state = "command"
 
     def go_down(self):
-        self.content.set_focus(self.position + 1)
-        self.show_key.set_text("Current: %s" % self.content.get_focus()[0].original_widget)
-        if isinstance(self.content.get_focus()[0].original_widget, urwid.Divider):
-            self.content.set_focus(self.position + 3)
+        self.frame.get_body().set_focus(self.position + 1)
+        self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, urwid.Divider):
+            self.frame.get_body().set_focus(self.position + 3)
             self.show_key.set_text("Gotcha !")
 
     def go_up(self):
         if self.position > 1:
-            self.content.set_focus(self.position - 1)
-            self.show_key.set_text("Current: %s" % self.content.get_focus()[0].original_widget)
-            if isinstance(self.content.get_focus()[0].original_widget, ContextWidget):
-                self.content.set_focus(self.position - 3)
+            self.frame.get_body().set_focus(self.position - 1)
+            self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
+            if isinstance(self.frame.get_body().get_focus()[0].original_widget, ContextWidget):
+                self.frame.get_body().set_focus(self.position - 3)
                 self.show_key.set_text("Gotcha !")
 
 if __name__ == "__main__":
