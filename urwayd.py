@@ -91,6 +91,8 @@ class Window(object):
         louie.connect(self.due_today,                  "T_main")
         louie.connect(self.due_today,                  "w_main")
         louie.connect(self.update_main_view,           "update_main")
+        louie.connect(self.get_add_todo,               "enter_add todo")
+        louie.connect(self.get_command,                "enter_command")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
@@ -134,29 +136,26 @@ class Window(object):
 
     def manage_input(self, input):
         self.position = self.content.get_focus()[1]
-        if self.frame.focus_part == "footer":
-            # TODO refatorer ça
-            if input == "enter" and self.state == "add todo":
-                self.frame.set_focus('body')
-                self.show_key.set_text("Todo description: " + self.footer.get_focus().edit_text)
-                todo_description = self.footer.get_focus().edit_text
-                context = self.content.get_focus()[0].original_widget.get_context()
-                if todo_description.strip():
-                    tdd.TodoDB().add_todo(todo_description, context=context)
-                self.footer.get_focus().edit_text = ""
-                self.footer.get_focus().set_caption("")
-                louie.send("update_main")
-                self.state = "main"
+        louie.send("%s_%s" % (input, self.state))
+        self.show_key.set_text(input)
 
-            elif input == "enter" and self.state == "command":
-                self.frame.set_focus('body')
-                self.show_key.set_text("User input: " + self.footer.get_focus().edit_text[1:])
-                self.footer.get_focus().edit_text = ""
-                self.state = "main"
+    def get_command(self):
+        self.frame.set_focus('body')
+        self.show_key.set_text("User input: " + self.footer.get_focus().edit_text[1:])
+        self.footer.get_focus().edit_text = ""
+        self.state = "main"
 
-        else:
-            louie.send("%s_%s" % (input, self.state))
-            self.show_key.set_text(input)
+    def get_add_todo(self):
+        self.frame.set_focus('body')
+        self.show_key.set_text("Todo description: " + self.footer.get_focus().edit_text)
+        todo_description = self.footer.get_focus().edit_text
+        context = self.content.get_focus()[0].original_widget.get_context()
+        if todo_description.strip():
+            tdd.TodoDB().add_todo(todo_description, context=context)
+        self.footer.get_focus().edit_text = ""
+        self.footer.get_focus().set_caption("")
+        louie.send("update_main")
+        self.state = "main"
 
     def due_today(self, days=1):
         if isinstance(self.content.get_focus()[0].original_widget, TodoWidget):
