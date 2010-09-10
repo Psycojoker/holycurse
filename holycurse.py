@@ -88,7 +88,7 @@ class Window(object):
         louie.connect(self.toggle_n_recreate,           "R_main")
         louie.connect(self.toggle_todo,                 " _main")
         louie.connect(self.due_today,                   "t_main")
-        louie.connect(self.due_in_3_days,                "T_main")
+        louie.connect(self.due_in_3_days,               "T_main")
         louie.connect(self.due_this_week,               "w_main")
         louie.connect(self.update_main_view,            "update_main")
         louie.connect(self.get_command,                 "enter_command")
