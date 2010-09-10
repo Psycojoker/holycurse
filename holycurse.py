@@ -93,6 +93,7 @@ class Window(object):
         louie.connect(self.update_main_view,            "update_main")
         louie.connect(self.get_add_todo,                "enter_add todo")
         louie.connect(self.get_command,                 "enter_command")
+        louie.connect(self.no_due,                      "W_main")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
@@ -171,6 +172,11 @@ class Window(object):
     def tickle_one_day(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
             self.frame.get_body().get_focus()[0].original_widget.item.tickle(datetime.now() + timedelta(days=1))
+        louie.send("update_main")
+
+    def no_due(self):
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
+            self.frame.get_body().get_focus()[0].original_widget.item.due_for(None)
         louie.send("update_main")
 
     def toggle_todo(self):
