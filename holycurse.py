@@ -88,8 +88,8 @@ class Window(object):
         louie.connect(self.toggle_n_recreate,           "R_main")
         louie.connect(self.toggle_todo,                 " _main")
         louie.connect(self.due_today,                   "t_main")
-        louie.connect(self.due_today,                   "T_main")
-        louie.connect(self.due_today,                   "w_main")
+        louie.connect(self.due_in_3_days,                "T_main")
+        louie.connect(self.due_this_week,               "w_main")
         louie.connect(self.update_main_view,            "update_main")
         louie.connect(self.get_add_todo,                "enter_add todo")
         louie.connect(self.get_command,                 "enter_command")
@@ -161,6 +161,12 @@ class Window(object):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
             self.frame.get_body().get_focus()[0].original_widget.due_today(days)
         louie.send("update_main")
+
+    def due_in_3_days(self):
+        self.due_today(4)
+
+    def due_this_week(self):
+        self.due_today(8)
 
     def tickle_one_day(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
