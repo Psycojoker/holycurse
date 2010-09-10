@@ -91,9 +91,10 @@ class Window(object):
         louie.connect(self.due_in_3_days,                "T_main")
         louie.connect(self.due_this_week,               "w_main")
         louie.connect(self.update_main_view,            "update_main")
-        louie.connect(self.get_add_todo,                "enter_add todo")
         louie.connect(self.get_command,                 "enter_command")
         louie.connect(self.no_due,                      "W_main")
+
+        louie.connect(self.get_add_todo,                "enter_add todo")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
