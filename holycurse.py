@@ -164,7 +164,8 @@ class Window(object):
         return input
 
     def manage_input(self, input):
-        self.position = self.frame.get_body().get_focus()[1]
+        if self.state == "main":
+            self.position = self.frame.get_body().get_focus()[1]
         if not louie.send("%s_%s" % (input, self.state)):
             self.show_key.set_text(input)
 
