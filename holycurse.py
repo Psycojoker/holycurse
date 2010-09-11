@@ -74,6 +74,7 @@ class Window(object):
         self.loop = urwid.MainLoop(self.frame, palette, input_filter=self.show_all_input, unhandled_input=self.manage_input)
         self.state = "main"
         self.init_signals()
+        self.position_chose_context = 0
 
     def exit(self):
         raise urwid.ExitMainLoop()
@@ -96,12 +97,40 @@ class Window(object):
 
         louie.connect(self.get_add_todo,                "enter_add todo")
 
+        louie.connect(self.chose_context,               "C_main")
+        louie.connect(self.go_up_chose_context,         "k_chose_context")
+        louie.connect(self.go_down_chose_context,       "j_chose_context")
+        louie.connect(self.return_to_main_view,         "q_chose_context")
+        louie.connect(self.select_context,              "enter_chose_context")
+
+    def select_context(self):
+        if isinstance(self.listbox.get_focus()[0].original_widget, TodoWidget):
+            self.listbox.get_focus()[0].original_widget.item.change_context(self.frame.get_body().get_focus()[0].original_widget.context.id)
+        louie.send("update_main")
+
+    def chose_context(self):
+        context_list = [ContextWidget(c) for c in tdd.TodoDB().list_contexts(all_contexts=True)]
+        context_list = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_list])
+        listbox = urwid.ListBox(context_list)
+        listbox.set_focus(self.position_chose_context)
+        self.frame.set_body(listbox)
+        self.state = "chose_context"
+        #self.content.get_focus()[0].original_widget.due_today(days)
+        #louie.send("update_main")
+
+    def return_to_main_view(self):
+        self.frame.set_body(self.listbox)
+        # TODO not the good position
+        #self.content.set_focus(self.position)
+        self.state = "main"
+
     def update_main_view(self):
         self.content = self.fill_main_view()
         self.listbox = urwid.ListBox(self.content)
         self.frame.set_body(self.listbox)
         # will fail with divider
         self.content.set_focus(self.position)
+        self.state = "main"
 
     def fill_main_view(self):
         main_view = []
@@ -199,6 +228,19 @@ class Window(object):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().insert_text(":")
         self.state = "command"
+
+    def go_down_chose_context(self):
+        # really unoptimised if
+        if self.position_chose_context < len(tdd.TodoDB().list_contexts(all_contexts=True)):
+            self.frame.get_body().set_focus(self.position_chose_context + 1)
+            self.position_chose_context += 1
+            self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
+
+    def go_up_chose_context(self):
+        if self.position_chose_context > 0:
+            self.frame.get_body().set_focus(self.position_chose_context - 1)
+            self.position_chose_context -= 1
+            self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     def go_down(self):
         self.frame.get_body().set_focus(self.position + 1)
