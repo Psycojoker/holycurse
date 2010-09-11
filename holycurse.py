@@ -115,8 +115,6 @@ class Window(object):
         listbox.set_focus(self.position_chose_context)
         self.frame.set_body(listbox)
         self.state = "chose_context"
-        #self.content.get_focus()[0].original_widget.due_today(days)
-        #louie.send("update_main")
 
     def return_to_main_view(self):
         self.frame.set_body(self.listbox)
