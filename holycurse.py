@@ -118,8 +118,6 @@ class Window(object):
 
     def return_to_main_view(self):
         self.frame.set_body(self.listbox)
-        # TODO not the good position
-        #self.content.set_focus(self.position)
         self.state = "main"
 
     def update_main_view(self):
