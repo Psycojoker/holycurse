@@ -3,27 +3,14 @@
 
 import urwid
 import louie
-import tdd
+import holygrail
 
 from datetime import datetime, timedelta
 
-class ItemWidget(urwid.Text):
+class MissionWidget(urwid.Text):
     def __init__(self, item):
-        if not isinstance(item, tdd._Item):
-            raise ValueError("Item widget need a tdd._Item object")
-        urwid.Text.__init__(self, ('item', "    " + item.description), wrap="clip")
-        self.item = item
-
-    def activate(self):
-        pass
-
-    def get_context(self):
-        return self.item.context
-
-class TodoWidget(ItemWidget):
-    def __init__(self, item):
-        if not isinstance(item, tdd._Todo):
-            raise ValueError("Todo widget need a tdd._Item object")
+        if not isinstance(item, holygrail._Mission):
+            raise ValueError("Mission widget need a holygrail._Mission object")
         self.item = item
         urwid.Text.__init__(self, self.display(), wrap="clip")
 
@@ -46,12 +33,15 @@ class TodoWidget(ItemWidget):
         else:
             self.item.due_for(datetime.today() + timedelta(days))
 
-class ContextWidget(urwid.Text):
-    def __init__(self, context):
-        if not isinstance(context, tdd._Context):
-            raise ValueError("Context widget need a tdd._Context object")
-        urwid.Text.__init__(self, ('context', context.description.upper()), wrap="clip")
-        self.context = context
+    def get_realm(self):
+        return self.item.realm
+
+class RealmWidget(urwid.Text):
+    def __init__(self, realm):
+        if not isinstance(realm, holygrail._Realm):
+            raise ValueError("Realm widget need a holygrail._Realm object")
+        urwid.Text.__init__(self, ('realm', realm.description.upper()), wrap="clip")
+        self.realm = realm
 
     def activate(self):
         pass
@@ -67,55 +57,55 @@ class Window(object):
 
         palette = [('header', 'white', 'dark red'),
                    ('reveal focus', 'white', 'dark red', 'standout'),
-                   ('context', 'dark red', '', 'bold'),
+                   ('realm', 'dark red', '', 'bold'),
                    ('item', 'light cyan', ''),
-                   ('todo', 'light gray', '')]
+                   ('mission', 'light gray', '')]
 
         self.loop = urwid.MainLoop(self.frame, palette, input_filter=self.show_all_input, unhandled_input=self.manage_input)
         self.state = "main"
         self.init_signals()
-        self.position_chose_context = 0
+        self.position_chose_realm = 0
 
     def exit(self):
         raise urwid.ExitMainLoop()
 
     def init_signals(self):
-        louie.connect(self.go_up,                       "k_main")
-        louie.connect(self.go_down,                     "j_main")
-        louie.connect(self.exit,                        "q_main")
-        louie.connect(self.command_line,                ":_main")
-        louie.connect(self.tickle_one_day,              "+_main")
-        louie.connect(self.tickle_3_hours,              "=_main")
-        louie.connect(self.at_todo_to_current_context,  "a_main")
-        louie.connect(self.toggle_n_recreate,           "R_main")
-        louie.connect(self.toggle_todo,                 " _main")
-        louie.connect(self.due_today,                   "t_main")
-        louie.connect(self.due_in_3_days,               "T_main")
-        louie.connect(self.due_this_week,               "w_main")
-        louie.connect(self.update_main_view,            "update_main")
-        louie.connect(self.get_command,                 "enter_command")
-        louie.connect(self.no_due,                      "W_main")
+        louie.connect(self.go_up,                          "k_main")
+        louie.connect(self.go_down,                        "j_main")
+        louie.connect(self.exit,                           "q_main")
+        louie.connect(self.command_line,                   ":_main")
+        louie.connect(self.tickle_one_day,                 "+_main")
+        louie.connect(self.tickle_3_hours,                 "=_main")
+        louie.connect(self.at_mission_to_current_realm,  "a_main")
+        louie.connect(self.toggle_n_recreate,              "R_main")
+        louie.connect(self.toggle_mission,                 " _main")
+        louie.connect(self.due_today,                      "t_main")
+        louie.connect(self.due_in_3_days,                  "T_main")
+        louie.connect(self.due_this_week,                  "w_main")
+        louie.connect(self.update_main_view,               "update_main")
+        louie.connect(self.get_command,                    "enter_command")
+        louie.connect(self.no_due,                         "W_main")
 
-        louie.connect(self.get_add_todo,                "enter_add todo")
+        louie.connect(self.get_add_mission,                "enter_add mission")
 
-        louie.connect(self.chose_context,               "C_main")
-        louie.connect(self.go_up_chose_context,         "k_chose_context")
-        louie.connect(self.go_down_chose_context,       "j_chose_context")
-        louie.connect(self.return_to_main_view,         "q_chose_context")
-        louie.connect(self.select_context,              "enter_chose_context")
+        louie.connect(self.chose_realm,                  "C_main")
+        louie.connect(self.go_up_chose_realm,            "k_chose_realm")
+        louie.connect(self.go_down_chose_realm,          "j_chose_realm")
+        louie.connect(self.return_to_main_view,            "q_chose_realm")
+        louie.connect(self.select_realm,                 "enter_chose_realm")
 
-    def select_context(self):
-        if isinstance(self.listbox.get_focus()[0].original_widget, TodoWidget):
-            self.listbox.get_focus()[0].original_widget.item.change_context(self.frame.get_body().get_focus()[0].original_widget.context.id)
+    def select_realm(self):
+        if isinstance(self.listbox.get_focus()[0].original_widget, MissionWidget):
+            self.listbox.get_focus()[0].original_widget.item.change_realm(self.frame.get_body().get_focus()[0].original_widget.realm.id)
         louie.send("update_main")
 
-    def chose_context(self):
-        context_list = [ContextWidget(c) for c in tdd.TodoDB().list_contexts(all_contexts=True)]
-        context_list = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_list])
-        listbox = urwid.ListBox(context_list)
-        listbox.set_focus(self.position_chose_context)
+    def chose_realm(self):
+        realm_list = [RealmWidget(c) for c in holygrail.Grail().list_realms(all_realms=True)]
+        realm_list = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in realm_list])
+        listbox = urwid.ListBox(realm_list)
+        listbox.set_focus(self.position_chose_realm)
         self.frame.set_body(listbox)
-        self.state = "chose_context"
+        self.state = "chose_realm"
 
     def return_to_main_view(self):
         self.frame.set_body(self.listbox)
@@ -131,26 +121,24 @@ class Window(object):
 
     def fill_main_view(self):
         main_view = []
-        for i in tdd.TodoDB().super_main_view():
+        for i in holygrail.Grail().super_main_view():
             try:
-                main_view.append(ContextWidget(i[0]))
+                main_view.append(RealmWidget(i[0]))
             except:
-                main_view.append(urwid.Text(('context', i[0].upper()), wrap="clip"))
+                main_view.append(urwid.Text(('realm', i[0].upper()), wrap="clip"))
             for j in i[1]:
-                main_view.append(ItemWidget(j))
-            for j in i[2]:
-                #main_view.append(urwid.Columns([('fixed', 4, urwid.Divider("    ")), TodoWidget(j), urwid.Text("blod")]))
-                main_view.append(TodoWidget(j))
+                #main_view.append(urwid.Columns([('fixed', 4, urwid.Divider("    ")), MissionWidget(j), urwid.Text("blod")]))
+                main_view.append(MissionWidget(j))
 
             main_view.append(urwid.Divider(" "))
 
         a = 0
-        main_view.append(urwid.Text(('context', "LAST COMPLETED TODOS"), wrap="clip"))
-        for i in tdd.TodoDB().last_completed_todos():
+        main_view.append(urwid.Text(('realm', "LAST COMPLETED TODOS"), wrap="clip"))
+        for i in holygrail.Grail().last_completed_missions():
             if a > 5:
                 break
             a += 1
-            main_view.append(TodoWidget(i))
+            main_view.append(MissionWidget(i))
 
         to_return = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in main_view[:-1]])
         to_return.set_focus(1)
@@ -174,20 +162,20 @@ class Window(object):
         self.footer.get_focus().edit_text = ""
         self.state = "main"
 
-    def get_add_todo(self):
+    def get_add_mission(self):
         self.frame.set_focus('body')
-        self.show_key.set_text("Todo description: " + self.footer.get_focus().edit_text)
-        todo_description = self.footer.get_focus().edit_text
-        context = self.frame.get_body().get_focus()[0].original_widget.get_context()
-        if todo_description.strip():
-            tdd.TodoDB().add_todo(todo_description, context=context)
+        self.show_key.set_text("Mission description: " + self.footer.get_focus().edit_text)
+        mission_description = self.footer.get_focus().edit_text
+        realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
+        if mission_description.strip():
+            holygrail.Grail().add_mission(mission_description, realm=realm)
         self.footer.get_focus().edit_text = ""
         self.footer.get_focus().set_caption("")
         louie.send("update_main")
         self.state = "main"
 
     def due_today(self, days=1):
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.due_today(days)
         louie.send("update_main")
 
@@ -198,51 +186,51 @@ class Window(object):
         self.due_today(8)
 
     def tickle_3_hours(self):
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.item.tickle(datetime.now() + timedelta(hours=3))
         louie.send("update_main")
 
     def tickle_one_day(self):
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.item.tickle(datetime.now() + timedelta(days=1))
         louie.send("update_main")
 
     def no_due(self):
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, TodoWidget):
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.item.due_for(None)
         louie.send("update_main")
 
-    def toggle_todo(self):
+    def toggle_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.activate()
         louie.send("update_main")
 
     def toggle_n_recreate(self):
-        todo = self.frame.get_body().get_focus()[0].original_widget
-        todo.activate()
-        tdd.TodoDB().add_todo(todo.item.description, context=todo.get_context())
+        mission = self.frame.get_body().get_focus()[0].original_widget
+        mission.activate()
+        holygrail.Grail().add_mission(mission.item.description, realm=mission.get_realm())
         louie.send("update_main")
 
-    def at_todo_to_current_context(self):
+    def at_mission_to_current_realm(self):
         self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Todo description: ")
-        self.state = "add todo"
+        self.frame.get_footer().get_focus().set_caption("Mission description: ")
+        self.state = "add mission"
 
     def command_line(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().insert_text(":")
         self.state = "command"
 
-    def go_down_chose_context(self):
+    def go_down_chose_realm(self):
         # really unoptimised if
-        if self.position_chose_context < len(tdd.TodoDB().list_contexts(all_contexts=True)):
-            self.frame.get_body().set_focus(self.position_chose_context + 1)
-            self.position_chose_context += 1
+        if self.position_chose_realm < len(holygrail.Grail().list_realms(all_realms=True)):
+            self.frame.get_body().set_focus(self.position_chose_realm + 1)
+            self.position_chose_realm += 1
             self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
-    def go_up_chose_context(self):
-        if self.position_chose_context > 0:
-            self.frame.get_body().set_focus(self.position_chose_context - 1)
-            self.position_chose_context -= 1
+    def go_up_chose_realm(self):
+        if self.position_chose_realm > 0:
+            self.frame.get_body().set_focus(self.position_chose_realm - 1)
+            self.position_chose_realm -= 1
             self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     def go_down(self):
@@ -256,7 +244,7 @@ class Window(object):
         if self.position > 1:
             self.frame.get_body().set_focus(self.position - 1)
             self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
-            if isinstance(self.frame.get_body().get_focus()[0].original_widget, ContextWidget):
+            if isinstance(self.frame.get_body().get_focus()[0].original_widget, RealmWidget):
                 self.frame.get_body().set_focus(self.position - 3)
                 self.show_key.set_text("Gotcha !")
 
