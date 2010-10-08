@@ -167,12 +167,14 @@ class Window(object):
         self.show_key.set_text("Mission description: " + self.footer.get_focus().edit_text)
         mission_description = self.footer.get_focus().edit_text
         realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
-        if mission_description.strip():
-            holygrail.Grail().add_mission(mission_description, realm=realm)
         self.footer.get_focus().edit_text = ""
         self.footer.get_focus().set_caption("")
-        louie.send("update_main")
         self.state = "main"
+        if mission_description.strip():
+            holygrail.Grail().add_mission(mission_description, realm=realm)
+        else:
+            return
+        louie.send("update_main")
 
     def due_today(self, days=1):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
