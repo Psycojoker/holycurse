@@ -76,7 +76,7 @@ class Window(object):
         louie.connect(self.command_line,                   ":_main")
         louie.connect(self.tickle_one_day,                 "+_main")
         louie.connect(self.tickle_3_hours,                 "=_main")
-        louie.connect(self.at_mission_to_current_realm,    "a_main")
+        louie.connect(self.add_mission_to_current_realm,   "a_main")
         louie.connect(self.toggle_n_recreate,              "R_main")
         louie.connect(self.toggle_mission,                 " _main")
         louie.connect(self.due_today,                      "t_main")
@@ -212,7 +212,7 @@ class Window(object):
         holygrail.Grail().add_mission(mission.item.description, realm=mission.get_realm())
         louie.send("update_main")
 
-    def at_mission_to_current_realm(self):
+    def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
         self.state = "add mission"
