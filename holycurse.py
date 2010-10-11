@@ -76,7 +76,7 @@ class Window(object):
         louie.connect(self.command_line,                   ":_main")
         louie.connect(self.tickle_one_day,                 "+_main")
         louie.connect(self.tickle_3_hours,                 "=_main")
-        louie.connect(self.at_mission_to_current_realm,  "a_main")
+        louie.connect(self.at_mission_to_current_realm,    "a_main")
         louie.connect(self.toggle_n_recreate,              "R_main")
         louie.connect(self.toggle_mission,                 " _main")
         louie.connect(self.due_today,                      "t_main")
@@ -88,11 +88,11 @@ class Window(object):
 
         louie.connect(self.get_add_mission,                "enter_add mission")
 
-        louie.connect(self.chose_realm,                  "C_main")
-        louie.connect(self.go_up_chose_realm,            "k_chose_realm")
-        louie.connect(self.go_down_chose_realm,          "j_chose_realm")
+        louie.connect(self.chose_realm,                    "C_main")
+        louie.connect(self.go_up_chose_realm,              "k_chose_realm")
+        louie.connect(self.go_down_chose_realm,            "j_chose_realm")
         louie.connect(self.return_to_main_view,            "q_chose_realm")
-        louie.connect(self.select_realm,                 "enter_chose_realm")
+        louie.connect(self.select_realm,                   "enter_chose_realm")
 
     def select_realm(self):
         if isinstance(self.listbox.get_focus()[0].original_widget, MissionWidget):
