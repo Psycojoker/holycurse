@@ -77,6 +77,7 @@ class Window(object):
         louie.connect(self.tickle_one_day,                 "+_main")
         louie.connect(self.tickle_3_hours,                 "=_main")
         louie.connect(self.add_mission_to_current_realm,   "a_main")
+        louie.connect(self.add_mission_to_default_realm,   "n_main")
         louie.connect(self.toggle_n_recreate,              "R_main")
         louie.connect(self.toggle_mission,                 " _main")
         louie.connect(self.due_today,                      "t_main")
@@ -215,6 +216,12 @@ class Window(object):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
         self.new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
+        self.state = "add mission"
+
+    def add_mission_to_default_realm(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Mission description: ")
+        self.new_mission_realm = holygrail.Grail().get_default_realm()
         self.state = "add mission"
 
     def command_line(self):
