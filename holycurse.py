@@ -172,9 +172,7 @@ class Window(object):
         self.state = "main"
         if mission_description.strip():
             holygrail.Grail().add_mission(mission_description, realm=self.new_mission_realm)
-        else:
-            return
-        louie.send("update_main")
+            louie.send("update_main")
 
     def due_today(self, days=1):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
