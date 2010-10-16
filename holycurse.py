@@ -78,6 +78,7 @@ class Window(object):
         louie.connect(self.tickle_3_hours,                 "=_main")
         louie.connect(self.add_mission_to_current_realm,   "a_main")
         louie.connect(self.add_mission_to_default_realm,   "n_main")
+        louie.connect(self.add_completed_mission,          "c_main")
         louie.connect(self.toggle_n_recreate,              "R_main")
         louie.connect(self.toggle_mission,                 " _main")
         louie.connect(self.due_today,                      "t_main")
@@ -88,6 +89,7 @@ class Window(object):
         louie.connect(self.no_due,                         "W_main")
 
         louie.connect(self.get_add_mission,                "enter_add mission")
+        louie.connect(self.get_add_mission_completed,      "enter_add mission_completed")
 
         louie.connect(self.chose_realm,                    "C_main")
         louie.connect(self.go_up_chose_realm,              "k_chose_realm")
@@ -174,6 +176,17 @@ class Window(object):
             holygrail.Grail().add_mission(mission_description, realm=self.new_mission_realm)
             louie.send("update_main")
 
+    def get_add_mission_completed(self):
+        self.frame.set_focus('body')
+        self.show_key.set_text("Mission description: " + self.footer.get_focus().edit_text)
+        mission_description = self.footer.get_focus().edit_text
+        self.footer.get_focus().edit_text = ""
+        self.footer.get_focus().set_caption("")
+        self.state = "main"
+        if mission_description.strip():
+            new_mission = holygrail.Grail().add_mission(mission_description, realm=self.new_mission_realm)
+            new_mission.toggle()
+
     def due_today(self, days=1):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.due_today(days)
@@ -209,6 +222,12 @@ class Window(object):
         mission.activate()
         holygrail.Grail().add_mission(mission.item.description, realm=mission.get_realm())
         louie.send("update_main")
+
+    def add_completed_mission(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Mission description: ")
+        self.new_mission_realm = holygrail.Grail().get_default_realm()
+        self.state = "add mission_completed"
 
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
