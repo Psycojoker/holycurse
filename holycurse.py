@@ -176,6 +176,7 @@ class Window(object):
         self.footer.get_focus().set_caption("")
         self.state = "main"
         if mission_description.strip():
+            self.position += 1
             holygrail.Grail().add_mission(mission_description, realm=self.new_mission_realm)
             louie.send("update_main")
 
