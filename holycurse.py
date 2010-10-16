@@ -140,7 +140,7 @@ class Window(object):
             main_view.append(urwid.Divider(" "))
 
         a = 0
-        main_view.append(urwid.Text(('realm', "LAST COMPLETED TODOS"), wrap="clip"))
+        main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
         for i in holygrail.Grail().last_completed_missions():
             if a > 5:
                 break
