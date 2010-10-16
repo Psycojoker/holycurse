@@ -15,12 +15,14 @@ class MissionWidget(urwid.Text):
         urwid.Text.__init__(self, self.display(), wrap="clip")
 
     def display(self):
-        display = "    %s" % self.item.description
+        display = ["   "]
+        display.append("%s" % self.item.description)
         if self.item.due:
+            display.append(" - ")
             if self.item.due > datetime.now():
-                display += " - %s left" % (datetime.now() - self.item.due)
+                display.append(("date left", "%s" % (datetime.now() - self.item.due)))
             else:
-                display += " - %s late" % (datetime.now() - self.item.due)
+                display.append(("date late", "%s" % (datetime.now() - self.item.due)))
 
         return display
 
@@ -62,7 +64,8 @@ class Window(object):
         palette = [('header', 'white', 'dark red'),
                    ('reveal focus', 'white', 'dark red', 'standout'),
                    ('realm', 'dark red', '', 'bold'),
-                   ('item', 'light cyan', ''),
+                   ('date left', 'black', 'light cyan'),
+                   ('date late', 'black', 'light cyan'),
                    ('mission', 'light gray', '')]
 
         self.loop = urwid.MainLoop(self.frame, palette, input_filter=self.show_all_input, unhandled_input=self.manage_input)
