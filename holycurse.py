@@ -134,7 +134,6 @@ class Window(object):
             except:
                 main_view.append(SeparationWidget(i[0]))
             for j in i[1]:
-                #main_view.append(urwid.Columns([('fixed', 4, urwid.Divider("    ")), MissionWidget(j), urwid.Text("blod")]))
                 main_view.append(MissionWidget(j))
 
             main_view.append(urwid.Divider(" "))
