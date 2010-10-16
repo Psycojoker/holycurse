@@ -36,14 +36,14 @@ class MissionWidget(urwid.Text):
     def get_realm(self):
         return self.item.realm
 
-class SeperationWidget(urwid.Text):
+class SeparationWidget(urwid.Text):
     def __init__(self, text):
         urwid.Text.__init__(self, ('realm', text.upper()), wrap="clip")
 
     def activate(self):
         pass
 
-class RealmWidget(SeperationWidget):
+class RealmWidget(SeparationWidget):
     def __init__(self, realm):
         if not isinstance(realm, holygrail._Realm):
             raise ValueError("Realm widget need a holygrail._Realm object")
@@ -132,7 +132,7 @@ class Window(object):
             try:
                 main_view.append(RealmWidget(i[0]))
             except:
-                main_view.append(SeperationWidget(i[0]))
+                main_view.append(SeparationWidget(i[0]))
             for j in i[1]:
                 #main_view.append(urwid.Columns([('fixed', 4, urwid.Divider("    ")), MissionWidget(j), urwid.Text("blod")]))
                 main_view.append(MissionWidget(j))
@@ -274,7 +274,7 @@ class Window(object):
         if self.position > 1:
             self.frame.get_body().set_focus(self.position - 1)
             self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
-            if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeperationWidget):
+            if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
                 self.frame.get_body().set_focus(self.position - 3)
                 self.show_key.set_text("Gotcha !")
 
