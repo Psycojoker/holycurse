@@ -274,7 +274,7 @@ class Window(object):
         if self.position > 1:
             self.frame.get_body().set_focus(self.position - 1)
             self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
-            if isinstance(self.frame.get_body().get_focus()[0].original_widget, RealmWidget):
+            if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeperationWidget):
                 self.frame.get_body().set_focus(self.position - 3)
                 self.show_key.set_text("Gotcha !")
 
