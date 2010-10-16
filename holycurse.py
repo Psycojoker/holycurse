@@ -36,15 +36,19 @@ class MissionWidget(urwid.Text):
     def get_realm(self):
         return self.item.realm
 
-class RealmWidget(urwid.Text):
+class SeperationWidget(urwid.Text):
+    def __init__(self, text):
+        urwid.Text.__init__(self, ('realm', text.upper()), wrap="clip")
+
+    def activate(self):
+        pass
+
+class RealmWidget(SeperationWidget):
     def __init__(self, realm):
         if not isinstance(realm, holygrail._Realm):
             raise ValueError("Realm widget need a holygrail._Realm object")
         urwid.Text.__init__(self, ('realm', realm.description.upper()), wrap="clip")
         self.realm = realm
-
-    def activate(self):
-        pass
 
 class Window(object):
     def __init__(self):
@@ -128,7 +132,7 @@ class Window(object):
             try:
                 main_view.append(RealmWidget(i[0]))
             except:
-                main_view.append(urwid.Text(('realm', i[0].upper()), wrap="clip"))
+                main_view.append(SeperationWidget(i[0]))
             for j in i[1]:
                 #main_view.append(urwid.Columns([('fixed', 4, urwid.Divider("    ")), MissionWidget(j), urwid.Text("blod")]))
                 main_view.append(MissionWidget(j))
