@@ -85,6 +85,10 @@ class Window(object):
         raise urwid.ExitMainLoop()
 
     def init_signals(self):
+        louie.connect(self.update_main_view,               "update_main")
+
+        louie.connect(self.get_command,                    "enter_command")
+
         louie.connect(self.go_up,                          "k_main")
         louie.connect(self.go_down,                        "j_main")
         louie.connect(self.exit,                           "q_main")
@@ -99,8 +103,6 @@ class Window(object):
         louie.connect(self.due_today,                      "t_main")
         louie.connect(self.due_in_3_days,                  "T_main")
         louie.connect(self.due_this_week,                  "w_main")
-        louie.connect(self.update_main_view,               "update_main")
-        louie.connect(self.get_command,                    "enter_command")
         louie.connect(self.no_due,                         "W_main")
 
         louie.connect(self.get_user_input,                 "enter_user_input")
