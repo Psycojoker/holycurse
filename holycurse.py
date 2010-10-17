@@ -123,6 +123,7 @@ class Window(object):
         louie.connect(self.due_this_week,                  "w_main")
         louie.connect(self.no_due,                         "W_main")
         louie.connect(self.add_quest_to_current_mission,   "p_main")
+        louie.connect(self.swap_mission_to_quest,          "s_main")
         louie.connect(self.update_realm_view,              "2_main")
 
         louie.connect(self.update_main_view,               "1_realm")
@@ -278,6 +279,26 @@ class Window(object):
         self.footer.get_focus().set_caption("")
         self.state = "main"
         louie.send("user_input_done")
+
+    def swap_mission_to_quest(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Mission description: ")
+        self.state = "user_input"
+        louie.connect(self.get_swap_mission_to_quest, "user_input_done")
+
+    def get_swap_mission_to_quest(self):
+        # I got what I want, disconnect
+        louie.disconnect(self.get_swap_mission_to_quest, "user_input_done")
+        if self.user_input.strip():
+            old_mission = self.frame.get_body().get_focus()[0].original_widget.item
+            is_quest = holygrail.Grail().get_quest_by_desc(old_mission.description)
+            if not is_quest:
+                new_quest = holygrail.Grail().add_quest(old_mission.description)
+                old_mission.change_quest(new_quest.id)
+            else:
+                old_mission.change_quest(is_quest[0].id)
+            old_mission.rename(self.user_input)
+            louie.send("update_main")
 
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
