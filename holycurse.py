@@ -15,14 +15,23 @@ class MissionWidget(urwid.Text):
         urwid.Text.__init__(self, self.display(), wrap="clip")
 
     def display(self):
+        def format_timedelta(td):
+            if -td.days > 1:
+                return "%s days" % ((-td.days) - 1)
+            else:
+                minutes = td.seconds / 60
+                if minutes > 60:
+                    return "%s hours" % (minutes  / (60))
+                else:
+                    return "%s minutes" % (minutes)
         display = ["   "]
         display.append("%s" % self.item.description)
         if self.item.due:
             display.append(" - ")
             if self.item.due > datetime.now():
-                display.append(("date left", "%s" % (datetime.now() - self.item.due)))
+                display.append(("date left", "%s" % format_timedelta(datetime.now() - self.item.due)))
             else:
-                display.append(("date late", "%s" % (datetime.now() - self.item.due)))
+                display.append(("date late", "%s" % format_timedelta(datetime.now() - self.item.due)))
 
         return display
 
@@ -65,7 +74,7 @@ class Window(object):
                    ('reveal focus', 'white', 'dark red', 'standout'),
                    ('realm', 'dark red', '', 'bold'),
                    ('date left', 'black', 'light cyan'),
-                   ('date late', 'black', 'light cyan'),
+                   ('date late', 'yellow', 'dark magenta'),
                    ('mission', 'light gray', '')]
 
         self.loop = urwid.MainLoop(self.frame, palette, input_filter=self.show_all_input, unhandled_input=self.manage_input)
