@@ -24,6 +24,7 @@ class MissionWidget(urwid.Text):
                     return "%s hours" % (minutes  / (60))
                 else:
                     return "%s minutes" % (minutes)
+
         display = ["   "]
         display.append("%s" % self.item.description)
         if self.item.due:
