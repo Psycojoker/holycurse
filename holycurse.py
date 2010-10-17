@@ -277,8 +277,6 @@ class Window(object):
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        # XXX useless
-        self.new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
         self.state = "user_input"
         louie.connect(self.get_current_realm_mission, "user_input_done")
 
@@ -313,7 +311,8 @@ class Window(object):
         louie.disconnect(self.get_current_realm_mission, "user_input_done")
         if self.user_input.strip():
             self.position += 1
-            holygrail.Grail().add_mission(self.user_input, realm=self.new_mission_realm)
+            new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
+            holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm)
             louie.send("update_main")
 
     def command_line(self):
