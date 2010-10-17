@@ -295,7 +295,7 @@ class Window(object):
         # I got what I want, disconnect
         louie.disconnect(self.get_quest_to_current_mission, "user_input_done")
         if self.user_input.strip():
-            is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.stip())
+            is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.strip())
             if not is_quest:
                 new_quest = holygrail.Grail().add_quest(self.user_input)
                 self.frame.get_body().get_focus()[0].original_widget.item.change_quest(new_quest.id)
