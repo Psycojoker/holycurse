@@ -103,8 +103,7 @@ class Window(object):
         louie.connect(self.get_command,                    "enter_command")
         louie.connect(self.no_due,                         "W_main")
 
-        louie.connect(self.get_add_mission,                "enter_add mission")
-        louie.connect(self.get_add_mission_completed,      "enter_add mission_completed")
+        louie.connect(self.get_user_input,                 "enter_user_input")
 
         louie.connect(self.chose_realm,                    "C_main")
         louie.connect(self.go_up_chose_realm,              "k_chose_realm")
@@ -179,29 +178,6 @@ class Window(object):
         self.footer.get_focus().edit_text = ""
         self.state = "main"
 
-    def get_add_mission(self):
-        self.frame.set_focus('body')
-        self.show_key.set_text("Mission description: " + self.footer.get_focus().edit_text)
-        mission_description = self.footer.get_focus().edit_text
-        self.footer.get_focus().edit_text = ""
-        self.footer.get_focus().set_caption("")
-        self.state = "main"
-        if mission_description.strip():
-            self.position += 1
-            holygrail.Grail().add_mission(mission_description, realm=self.new_mission_realm)
-            louie.send("update_main")
-
-    def get_add_mission_completed(self):
-        self.frame.set_focus('body')
-        self.show_key.set_text("Mission description: " + self.footer.get_focus().edit_text)
-        mission_description = self.footer.get_focus().edit_text
-        self.footer.get_focus().edit_text = ""
-        self.footer.get_focus().set_caption("")
-        self.state = "main"
-        if mission_description.strip():
-            new_mission = holygrail.Grail().add_mission(mission_description, realm=self.new_mission_realm)
-            new_mission.toggle()
-
     def due_today(self, days=1):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.due_today(days)
@@ -238,23 +214,59 @@ class Window(object):
         holygrail.Grail().add_mission(mission.item.description, realm=mission.get_realm())
         louie.send("update_main")
 
-    def add_completed_mission(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        self.new_mission_realm = holygrail.Grail().get_default_realm()
-        self.state = "add mission_completed"
+    def get_user_input(self):
+        self.frame.set_focus('body')
+        # debug
+        self.show_key.set_text("Mission description: " + self.footer.get_focus().edit_text)
+        self.user_input = self.footer.get_focus().edit_text
+        self.footer.get_focus().edit_text = ""
+        self.footer.get_focus().set_caption("")
+        self.state = "main"
+        louie.send("user_input_done")
 
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
+        # XXX useless
         self.new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
-        self.state = "add mission"
+        self.state = "user_input"
+        louie.connect(self.get_current_realm_mission, "user_input_done")
 
     def add_mission_to_default_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
+        # XXX useless
         self.new_mission_realm = holygrail.Grail().get_default_realm()
-        self.state = "add mission"
+        self.state = "user_input"
+        louie.connect(self.get_default_realm_mission, "user_input_done")
+
+    def add_completed_mission(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Mission description: ")
+        self.state = "user_input"
+        # this is the receiver
+        louie.connect(self.get_completed_mission, "user_input_done")
+
+    def get_completed_mission(self):
+        # I got what I want, disconnect
+        louie.disconnect(self.get_completed_mission, "user_input_done")
+        if self.user_input.strip():
+            new_mission = holygrail.Grail().add_mission(self.user_input)
+            new_mission.toggle()
+
+    def get_default_realm_mission(self):
+        louie.disconnect(self.get_current_realm_mission, "user_input_done")
+        if self.user_input.strip():
+            self.position += 1
+            holygrail.Grail().add_mission(self.user_input, realm=self.new_mission_realm)
+            louie.send("update_main")
+
+    def get_current_realm_mission(self):
+        louie.disconnect(self.get_current_realm_mission, "user_input_done")
+        if self.user_input.strip():
+            self.position += 1
+            holygrail.Grail().add_mission(self.user_input, realm=self.new_mission_realm)
+            louie.send("update_main")
 
     def command_line(self):
         self.frame.set_focus('footer')
