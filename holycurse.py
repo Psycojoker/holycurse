@@ -57,7 +57,11 @@ class RealmWidget(SeparationWidget):
     def __init__(self, realm):
         if not isinstance(realm, holygrail._Realm):
             raise ValueError("Realm widget need a holygrail._Realm object")
-        urwid.Text.__init__(self, ('realm', realm.description.upper()), wrap="clip")
+        text = [('realm', realm.description.upper())]
+        if realm.hide:
+            text.append(" - ")
+            text.append(("date left", "HIDE"))
+        urwid.Text.__init__(self, text, wrap="clip")
         self.realm = realm
 
 class Window(object):
@@ -140,7 +144,7 @@ class Window(object):
         self.state = "main"
 
     def update_realm_view(self):
-        context_view = [RealmWidget(i) for i in holygrail.Grail().list_realms()]
+        context_view = [RealmWidget(i) for i in holygrail.Grail().list_realms(all_realms=True)]
         self.content = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
         self.listbox = urwid.ListBox(self.content)
         self.frame.set_body(self.listbox)
