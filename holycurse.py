@@ -71,7 +71,7 @@ class Window(object):
     def __init__(self):
         self.content = self.fill_main_view()
         self.listbox = urwid.ListBox(self.content)
-        self.show_key = urwid.Text("Toudoudone 0.1", wrap='clip')
+        self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
         self.top = urwid.AttrMap(self.show_key, 'header')
         self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', "I am before command line")), "header"), urwid.Edit("", "")])
         self.frame = urwid.Frame(self.listbox, self.top, self.footer)
@@ -153,7 +153,6 @@ class Window(object):
         self.content = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
         self.listbox = urwid.ListBox(self.content)
         self.frame.set_body(self.listbox)
-        # will fail with divider
         self.content.set_focus(self.position_chose_realm)
         self.state = "realm"
 
@@ -161,7 +160,6 @@ class Window(object):
         self.content = self.fill_main_view()
         self.listbox = urwid.ListBox(self.content)
         self.frame.set_body(self.listbox)
-        # will fail with divider
         self.content.set_focus(self.position)
         self.state = "main"
 
