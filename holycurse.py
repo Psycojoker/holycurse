@@ -118,6 +118,8 @@ class Window(object):
         louie.connect(self.update_realm_view,              "2_main")
 
         louie.connect(self.update_main_view,               "1_realm")
+        louie.connect(self.move_up_realm,                  "K_realm")
+        louie.connect(self.move_down_realm,                "J_realm")
         louie.connect(self.go_up_chose_realm,              "k_realm")
         louie.connect(self.go_down_chose_realm,            "j_realm")
         louie.connect(self.toggle_realm_hide,              " _realm")
@@ -303,6 +305,22 @@ class Window(object):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().insert_text(":")
         self.state = "command"
+
+    def move_down_realm(self):
+        if self.position_chose_realm < len(holygrail.Grail().list_realms(all_realms=True)):
+            realm = self.frame.get_body().get_focus()[0].original_widget.realm
+            a = realm.position
+            realm.change_position(realm.position + 1)
+            self.position_chose_realm += 1
+            louie.send("update_realm")
+            self.show_key.set_text("%s %s" % (a, realm.position))
+
+    def move_up_realm(self):
+        if self.position_chose_realm > 0:
+            realm = self.frame.get_body().get_focus()[0].original_widget.realm
+            realm.change_position(realm.position - 1)
+            self.position_chose_realm -= 1
+            louie.send("update_realm")
 
     def go_down_chose_realm(self):
         # really unoptimised if
