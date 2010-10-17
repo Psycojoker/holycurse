@@ -149,7 +149,7 @@ class Window(object):
         self.listbox = urwid.ListBox(self.content)
         self.frame.set_body(self.listbox)
         # will fail with divider
-        #self.content.set_focus(self.position)
+        self.content.set_focus(self.position_chose_realm)
         self.state = "realm"
 
     def update_main_view(self):
