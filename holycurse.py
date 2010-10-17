@@ -107,6 +107,9 @@ class Window(object):
         louie.connect(self.due_in_3_days,                  "T_main")
         louie.connect(self.due_this_week,                  "w_main")
         louie.connect(self.no_due,                         "W_main")
+        louie.connect(self.update_realm_view,              "2_main")
+
+        louie.connect(self.update_main_view,               "1_realm")
 
         louie.connect(self.get_user_input,                 "enter_user_input")
 
@@ -132,6 +135,15 @@ class Window(object):
     def return_to_main_view(self):
         self.frame.set_body(self.listbox)
         self.state = "main"
+
+    def update_realm_view(self):
+        context_view = [RealmWidget(i) for i in holygrail.Grail().list_realms()]
+        self.content = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
+        self.listbox = urwid.ListBox(self.content)
+        self.frame.set_body(self.listbox)
+        # will fail with divider
+        #self.content.set_focus(self.position)
+        self.state = "realm"
 
     def update_main_view(self):
         self.content = self.fill_main_view()
