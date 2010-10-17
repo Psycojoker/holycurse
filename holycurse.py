@@ -111,6 +111,7 @@ class Window(object):
         louie.connect(self.add_completed_mission,          "c_main")
         louie.connect(self.toggle_n_recreate,              "R_main")
         louie.connect(self.toggle_mission,                 " _main")
+        louie.connect(self.remove_mission,                 "d_main")
         louie.connect(self.due_today,                      "t_main")
         louie.connect(self.due_in_3_days,                  "T_main")
         louie.connect(self.due_this_week,                  "w_main")
@@ -233,6 +234,15 @@ class Window(object):
     def toggle_realm_hide(self):
         self.frame.get_body().get_focus()[0].original_widget.activate()
         louie.send("update_realm")
+
+    def remove_mission(self):
+        self.frame.get_body().get_focus()[0].original_widget.item.remove()
+        self.frame.get_body().set_focus(self.position - 1)
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
+            self.frame.get_body().set_focus(self.position)
+        else:
+            self.position -= 1
+        louie.send("update_main")
 
     def toggle_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.activate()
