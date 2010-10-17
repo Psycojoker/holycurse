@@ -28,7 +28,7 @@ class MissionWidget(urwid.Text):
         display = ["   "]
         old = date.today() - self.item.created_at
         if (old.days - 1)/7 > 0:
-            display.append("."*((old.days - 1)/7))
+            display.append(("old", "|"*((old.days - 1)/7)))
             display.append(" ")
         display.append("%s" % self.item.description)
         if self.item.quest:
@@ -89,6 +89,7 @@ class Window(object):
                    ('reveal focus', 'white', 'dark red', 'standout'),
                    ('realm', 'dark red', '', 'bold'),
                    ('quest', 'light green', '', 'bold'),
+                   ('old', 'yellow', '', 'bold'),
                    ('date left', 'black', 'light cyan'),
                    ('date late', 'yellow', 'dark magenta'),
                    ('mission', 'light gray', '')]
