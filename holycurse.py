@@ -110,6 +110,9 @@ class Window(object):
         louie.connect(self.update_realm_view,              "2_main")
 
         louie.connect(self.update_main_view,               "1_realm")
+        louie.connect(self.go_up_chose_realm,              "k_realm")
+        louie.connect(self.go_down_chose_realm,            "j_realm")
+        louie.connect(self.exit,                           "q_realm")
 
         louie.connect(self.get_user_input,                 "enter_user_input")
 
