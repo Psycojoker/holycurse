@@ -84,6 +84,9 @@ class Window(object):
     def exit(self):
         raise urwid.ExitMainLoop()
 
+    def run(self):
+        self.loop.run()
+
     def init_signals(self):
         louie.connect(self.update_main_view,               "update_main")
 
@@ -161,9 +164,6 @@ class Window(object):
         to_return = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in main_view[:-1]])
         to_return.set_focus(1)
         return to_return
-
-    def run(self):
-        self.loop.run()
 
     def show_all_input(self, input, raw):
         return input
