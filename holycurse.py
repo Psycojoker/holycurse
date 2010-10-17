@@ -29,10 +29,8 @@ class MissionWidget(urwid.Text):
         display.append("%s" % self.item.description)
         if self.item.due:
             display.append(" - ")
-            if self.item.due > datetime.now():
-                display.append(("date left", "%s" % format_timedelta(datetime.now() - self.item.due)))
-            else:
-                display.append(("date late", "%s" % format_timedelta(datetime.now() - self.item.due)))
+            color = "date left" if self.item.due > datetime.now() else "date late"
+            display.append((color, "%s" % format_timedelta(datetime.now() - self.item.due)))
 
         return display
 
