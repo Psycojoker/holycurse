@@ -31,6 +31,9 @@ class MissionWidget(urwid.Text):
             display.append(" - ")
             color = "date left" if self.item.due > datetime.now() else "date late"
             display.append((color, "%s" % format_timedelta(datetime.now() - self.item.due)))
+        if self.item.quest:
+            display.append(" ")
+            display.append(("quest", "[%s]" % self.item.quest.description))
 
         return display
 
@@ -81,6 +84,7 @@ class Window(object):
         palette = [('header', 'white', 'dark red'),
                    ('reveal focus', 'white', 'dark red', 'standout'),
                    ('realm', 'dark red', '', 'bold'),
+                   ('quest', 'light green', '', 'bold'),
                    ('date left', 'black', 'light cyan'),
                    ('date late', 'yellow', 'dark magenta'),
                    ('mission', 'light gray', '')]
