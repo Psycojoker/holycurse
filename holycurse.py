@@ -5,7 +5,7 @@ import urwid
 import louie
 import holygrail
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 class MissionWidget(urwid.Text):
     def __init__(self, item):
@@ -26,6 +26,10 @@ class MissionWidget(urwid.Text):
                     return "%s minutes" % (minutes)
 
         display = ["   "]
+        old = date.today() - self.item.created_at
+        if (old.days - 1)/7 > 0:
+            display.append("."*((old.days - 1)/7))
+            display.append(" ")
         display.append("%s" % self.item.description)
         if self.item.quest:
             display.append(" ")
