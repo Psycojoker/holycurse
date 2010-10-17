@@ -122,6 +122,7 @@ class Window(object):
         louie.connect(self.due_in_3_days,                  "T_main")
         louie.connect(self.due_this_week,                  "w_main")
         louie.connect(self.no_due,                         "W_main")
+        louie.connect(self.add_quest_to_current_mission,   "p_main")
         louie.connect(self.update_realm_view,              "2_main")
 
         louie.connect(self.update_main_view,               "1_realm")
@@ -283,6 +284,20 @@ class Window(object):
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
         self.state = "user_input"
         louie.connect(self.get_current_realm_mission, "user_input_done")
+
+    def add_quest_to_current_mission(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Quest description: ")
+        self.state = "user_input"
+        louie.connect(self.get_quest_to_current_mission, "user_input_done")
+
+    def get_quest_to_current_mission(self):
+        # I got what I want, disconnect
+        louie.disconnect(self.get_quest_to_current_mission, "user_input_done")
+        if self.user_input.strip():
+            new_quest = holygrail.Grail().add_quest(self.user_input)
+            self.frame.get_body().get_focus()[0].original_widget.item.change_quest(new_quest.id)
+            louie.send("update_main")
 
     def add_mission_to_default_realm(self):
         self.frame.set_focus('footer')
