@@ -64,6 +64,9 @@ class RealmWidget(SeparationWidget):
         urwid.Text.__init__(self, text, wrap="clip")
         self.realm = realm
 
+    def activate(self):
+        self.realm.toggle_hide()
+
 class Window(object):
     def __init__(self):
         self.content = self.fill_main_view()
@@ -93,6 +96,7 @@ class Window(object):
 
     def init_signals(self):
         louie.connect(self.update_main_view,               "update_main")
+        louie.connect(self.update_realm_view,              "update_realm")
 
         louie.connect(self.get_command,                    "enter_command")
 
@@ -116,6 +120,7 @@ class Window(object):
         louie.connect(self.update_main_view,               "1_realm")
         louie.connect(self.go_up_chose_realm,              "k_realm")
         louie.connect(self.go_down_chose_realm,            "j_realm")
+        louie.connect(self.toggle_realm_hide,              " _realm")
         louie.connect(self.exit,                           "q_realm")
 
         louie.connect(self.get_user_input,                 "enter_user_input")
@@ -224,6 +229,10 @@ class Window(object):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.item.due_for(None)
         louie.send("update_main")
+
+    def toggle_realm_hide(self):
+        self.frame.get_body().get_focus()[0].original_widget.activate()
+        louie.send("update_realm")
 
     def toggle_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.activate()
