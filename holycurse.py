@@ -54,10 +54,12 @@ class SeparationWidget(urwid.Text):
         pass
 
 class RealmWidget(SeparationWidget):
-    def __init__(self, realm):
+    def __init__(self, realm, detailled=False):
         if not isinstance(realm, holygrail._Realm):
             raise ValueError("Realm widget need a holygrail._Realm object")
         text = [('realm', realm.description.upper())]
+        if detailled:
+            text.append(" (%i)" % len(realm.get_missions()))
         if realm.hide:
             text.append(" - ")
             text.append(("date left", "HIDE"))
@@ -152,12 +154,15 @@ class Window(object):
         self.state = "main"
 
     def update_realm_view(self):
-        context_view = [RealmWidget(i) for i in holygrail.Grail().list_realms(all_realms=True)]
-        self.content = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
+        self.content = self.fill_realm_view()
         self.listbox = urwid.ListBox(self.content)
         self.frame.set_body(self.listbox)
         self.content.set_focus(self.position_chose_realm)
         self.state = "realm"
+
+    def fill_realm_view(self):
+        context_view = [RealmWidget(i, detailled=True) for i in holygrail.Grail().list_realms(all_realms=True)]
+        return urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
 
     def update_main_view(self):
         self.content = self.fill_main_view()
