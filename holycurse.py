@@ -206,6 +206,11 @@ class Window(object):
 
     def toggle_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.activate()
+        self.frame.get_body().set_focus(self.position - 1)
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
+            self.frame.get_body().set_focus(self.position)
+        else:
+            self.position -= 1
         louie.send("update_main")
 
     def toggle_n_recreate(self):
