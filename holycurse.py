@@ -266,12 +266,6 @@ class Window(object):
         if not mission.completed and mission.quest:
             self.add_new_mission_to_quest()
         else:
-            self.frame.get_body().set_focus(self.position - 1)
-            if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
-                self.frame.get_body().set_focus(self.position)
-            else:
-                self.position -= 1
-
             mission.toggle()
             louie.send("update_main")
 
