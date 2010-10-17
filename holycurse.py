@@ -313,7 +313,6 @@ class Window(object):
             realm.change_position(realm.position + 1)
             self.position_chose_realm += 1
             louie.send("update_realm")
-            self.show_key.set_text("%s %s" % (a, realm.position))
 
     def move_up_realm(self):
         if self.position_chose_realm > 0:
