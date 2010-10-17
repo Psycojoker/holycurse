@@ -260,13 +260,19 @@ class Window(object):
         louie.send("update_main")
 
     def toggle_mission(self):
-        self.frame.get_body().get_focus()[0].original_widget.activate()
-        self.frame.get_body().set_focus(self.position - 1)
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
-            self.frame.get_body().set_focus(self.position)
+        mission = self.frame.get_body().get_focus()[0].original_widget.item
+
+        if not mission.completed and mission.quest:
+            self.add_new_mission_to_quest()
         else:
-            self.position -= 1
-        louie.send("update_main")
+            self.frame.get_body().set_focus(self.position - 1)
+            if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
+                self.frame.get_body().set_focus(self.position)
+            else:
+                self.position -= 1
+
+            mission.toggle()
+            louie.send("update_main")
 
     def toggle_n_recreate(self):
         mission = self.frame.get_body().get_focus()[0].original_widget
@@ -303,6 +309,21 @@ class Window(object):
                 old_mission.change_quest(is_quest[0].id)
             old_mission.rename(self.user_input)
             louie.send("update_main")
+
+    def add_new_mission_to_quest(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Next mission description: ")
+        self.state = "user_input"
+        louie.connect(self.get_next_mission_to_quest, "user_input_done")
+
+    def get_next_mission_to_quest(self):
+        # I got what I want, disconnect
+        louie.disconnect(self.get_next_mission_to_quest, "user_input_done")
+        old_mission = self.frame.get_body().get_focus()[0].original_widget.item
+        if self.user_input.strip():
+            new_mission = holygrail.Grail().add_mission(self.user_input, quest=old_mission.quest.id)
+        old_mission.toggle()
+        louie.send("update_main")
 
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
