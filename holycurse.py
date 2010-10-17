@@ -295,8 +295,12 @@ class Window(object):
         # I got what I want, disconnect
         louie.disconnect(self.get_quest_to_current_mission, "user_input_done")
         if self.user_input.strip():
-            new_quest = holygrail.Grail().add_quest(self.user_input)
-            self.frame.get_body().get_focus()[0].original_widget.item.change_quest(new_quest.id)
+            is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.stip())
+            if not is_quest:
+                new_quest = holygrail.Grail().add_quest(self.user_input)
+                self.frame.get_body().get_focus()[0].original_widget.item.change_quest(new_quest.id)
+            else:
+                self.frame.get_body().get_focus()[0].original_widget.item.change_quest(is_quest[0].id)
             louie.send("update_main")
 
     def add_mission_to_default_realm(self):
