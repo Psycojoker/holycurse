@@ -202,7 +202,6 @@ class Window(object):
 
             main_view.append(urwid.Divider(" "))
 
-        print "LAST COMPLETED MISSIONS", last_completed_missions
         if len(last_completed_missions) != 0:
             a = 0
             main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
