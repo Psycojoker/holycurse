@@ -183,8 +183,13 @@ class Window(object):
         self.state = "main"
 
     def fill_main_view(self):
+        super_main_view = holygrail.Grail().super_main_view()
+        last_completed_missions = holygrail.Grail().last_completed_missions()
+        if not super_main_view and not last_completed_missions:
+            return urwid.SimpleListWalker([urwid.Text("You don't have any mission, press 'n' to create a new one")])
         main_view = []
-        for i in holygrail.Grail().super_main_view():
+        for i in super_main_view:
+            # bouuuh ! ugly code !
             try:
                 main_view.append(RealmWidget(i[0]))
             except:
@@ -194,15 +199,18 @@ class Window(object):
 
             main_view.append(urwid.Divider(" "))
 
-        a = 0
-        main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
-        for i in holygrail.Grail().last_completed_missions():
-            if a > 5:
-                break
-            a += 1
-            main_view.append(MissionWidget(i))
+        print "LAST COMPLETED MISSIONS", last_completed_missions
+        if len(last_completed_missions) != 0:
+            a = 0
+            main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
+            for i in holygrail.Grail().last_completed_missions():
+                if a > 5:
+                    break
+                a += 1
+                main_view.append(MissionWidget(i))
 
-        to_return = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in main_view[:-1]])
+        to_return = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in main_view])
+
         to_return.set_focus(1)
         return to_return
 
