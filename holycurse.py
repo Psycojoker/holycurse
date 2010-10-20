@@ -173,7 +173,10 @@ class Window(object):
 
     def fill_realm_view(self):
         context_view = [RealmWidget(i, detailled=True) for i in holygrail.Grail().list_realms(all_realms=True)]
-        return urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
+        if context_view:
+            return urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
+        else:
+            return urwid.SimpleListWalker([urwid.Text("Error, you don't have any realm, something really wrong has happended")])
 
     def update_main_view(self):
         self.content = self.fill_main_view()
