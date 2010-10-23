@@ -129,6 +129,7 @@ class Window(object):
         louie.connect(self.no_due,                         "W_main")
         louie.connect(self.add_quest_to_current_mission,   "p_main")
         louie.connect(self.swap_mission_to_quest,          "s_main")
+        louie.connect(self.rename_mission,                 "r_main")
         louie.connect(self.update_realm_view,              "2_main")
 
         louie.connect(self.update_main_view,               "1_realm")
@@ -330,6 +331,12 @@ class Window(object):
         old_mission.toggle()
         louie.send("update_main")
 
+    def rename_mission(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("New mission description: ")
+        self.state = "user_input"
+        louie.connect(self.get_rename_mission, "user_input_done")
+
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
@@ -341,6 +348,12 @@ class Window(object):
         self.frame.get_footer().get_focus().set_caption("Quest description: ")
         self.state = "user_input"
         louie.connect(self.get_quest_to_current_mission, "user_input_done")
+
+    def get_rename_mission(self):
+        louie.disconnect(self.get_rename_mission, "user_input_done")
+        if self.user_input.strip():
+            self.frame.get_body().get_focus()[0].original_widget.item.rename(self.user_input.strip())
+            louie.send("update_main")
 
     def get_quest_to_current_mission(self):
         # I got what I want, disconnect
