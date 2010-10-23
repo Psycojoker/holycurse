@@ -141,6 +141,7 @@ class Window(object):
         louie.connect(self.add_new_realm,                  "a_realm")
         louie.connect(self.add_new_realm,                  "n_realm")
         louie.connect(self.rename_realm,                   "r_realm")
+        louie.connect(self.remove_realm,                   "d_realm")
         louie.connect(self.exit,                           "q_realm")
 
         louie.connect(self.get_user_input,                 "enter_user_input")
@@ -273,6 +274,26 @@ class Window(object):
         else:
             self.position -= 1
         louie.send("update_main")
+
+    def remove_realm(self):
+        realm = self.frame.get_body().get_focus()[0].original_widget.realm
+        if realm.default_realm:
+            # TODO display error
+            return
+        all_missions = realm.get_missions(all_missions=True)
+
+        # I can't delete a realm with mission, so move all the missions to the default realm
+        if all_missions:
+            for i in all_missions:
+                i.change_realm(holygrail.Grail().get_default_realm().id)
+        realm.remove()
+
+        self.frame.get_body().set_focus(self.position - 1)
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
+            self.frame.get_body().set_focus(self.position)
+        else:
+            self.position -= 1
+        louie.send("update_realm")
 
     def toggle_mission(self):
         mission = self.frame.get_body().get_focus()[0].original_widget.item
