@@ -138,6 +138,8 @@ class Window(object):
         louie.connect(self.go_up_chose_realm,              "k_realm")
         louie.connect(self.go_down_chose_realm,            "j_realm")
         louie.connect(self.toggle_realm_hide,              " _realm")
+        louie.connect(self.add_new_realm,                  "a_realm")
+        louie.connect(self.add_new_realm,                  "n_realm")
         louie.connect(self.exit,                           "q_realm")
 
         louie.connect(self.get_user_input,                 "enter_user_input")
@@ -337,6 +339,12 @@ class Window(object):
         self.state = "user_input"
         louie.connect(self.get_rename_mission, "user_input_done")
 
+    def add_new_realm(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Realm description: ")
+        self.state = "user_input"
+        louie.connect(self.get_new_realm, "user_input_done")
+
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
@@ -348,6 +356,13 @@ class Window(object):
         self.frame.get_footer().get_focus().set_caption("Quest description: ")
         self.state = "user_input"
         louie.connect(self.get_quest_to_current_mission, "user_input_done")
+
+    def get_new_realm(self):
+        louie.disconnect(self.get_new_realm, "user_input_done")
+        if self.user_input.strip():
+            self.position += 1
+            holygrail.Grail().add_realm(self.user_input)
+            louie.send("update_realm")
 
     def get_rename_mission(self):
         louie.disconnect(self.get_rename_mission, "user_input_done")
