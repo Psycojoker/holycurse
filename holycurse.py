@@ -66,6 +66,8 @@ class RealmWidget(SeparationWidget):
             raise ValueError("Realm widget need a holygrail._Realm object")
         text = [('realm', realm.description.upper())]
         if detailled:
+            if realm.default_realm:
+                text.append(( "quest", " [default]"))
             text.append(" (%i)" % len(realm.get_missions()))
         if realm.hide:
             text.append(" - ")
