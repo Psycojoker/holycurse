@@ -190,6 +190,12 @@ class Window(object):
         self.listbox = urwid.ListBox(self.content)
         self.frame.set_body(self.listbox)
         self.content.set_focus(self.position)
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, urwid.Divider):
+            self.position -= 1
+            self.content.set_focus(self.position)
+        elif isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
+            self.position += 1
+            self.content.set_focus(self.position)
         self.state = "main"
 
     def fill_main_view(self):
