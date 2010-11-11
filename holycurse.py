@@ -236,6 +236,7 @@ class Window(object):
         if self.state == "main":
             self.position = self.frame.get_body().get_focus()[1]
         if not louie.send("%s_%s" % (input, self.state)):
+            # tuple == mouse input
             self.show_key.set_text(input if not isinstance(input, tuple) else "%s, %s, %s, %s" % input)
 
     def get_command(self):
