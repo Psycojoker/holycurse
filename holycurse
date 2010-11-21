@@ -57,6 +57,9 @@ class MissionWidget(urwid.Text):
     def get_realm(self):
         return self.item.realm
 
+    def get_quest(self):
+        return self.item.quest
+
 class SeparationWidget(urwid.Text):
     def __init__(self, text):
         urwid.Text.__init__(self, ('realm', text.upper()), wrap="clip")
@@ -320,7 +323,7 @@ class Window(object):
     def toggle_n_recreate(self):
         mission = self.frame.get_body().get_focus()[0].original_widget
         mission.activate()
-        holygrail.Grail().add_mission(mission.item.description, realm=mission.get_realm())
+        holygrail.Grail().add_mission(mission.item.description, quest=mission.get_quest(), realm=mission.get_realm())
         louie.send("update_main")
 
     def get_user_input(self):
@@ -364,7 +367,7 @@ class Window(object):
         louie.disconnect(self.get_next_mission_to_quest, "user_input_done")
         old_mission = self.frame.get_body().get_focus()[0].original_widget.item
         if self.user_input.strip():
-            new_mission = holygrail.Grail().add_mission(self.user_input, quest=old_mission.quest.id)
+            new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
         old_mission.toggle()
         louie.send("update_main")
 
