@@ -202,7 +202,7 @@ class Window(object):
 
     def __init__(self):
         self.state = State(set(("main", "command", "realm", "user_input", "chose_realm")), "main")
-        self.frame = urwid.Frame(urwid.Text("haha"))
+        self.frame = urwid.Frame(urwid.Text(""))
         self.main_view = MainViewList(self.frame)
         self.listbox = urwid.ListBox(self.main_view.get_main_view())
         self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
