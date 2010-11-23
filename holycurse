@@ -147,18 +147,18 @@ class MainViewList(object):
 
     def go_down(self):
         self.frame.get_body().set_focus(self.position + 1)
-        #self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
+        louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, urwid.Divider):
             self.frame.get_body().set_focus(self.position + 3)
-            #self.show_key.set_text("Gotcha !")
+            louie.send("show key", None, "Gotcha !")
 
     def go_up(self):
         if self.position > 1:
             self.frame.get_body().set_focus(self.position - 1)
-            #self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
+            louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
             if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
                 self.frame.get_body().set_focus(self.position - 3)
-                #self.show_key.set_text("Gotcha !")
+                louie.send("show key", None, "Gotcha !")
 
 class Window(object):
     def __init__(self):
@@ -195,12 +195,12 @@ class Window(object):
     def init_signals(self):
         self.main_view.init_signals()
 
+        louie.connect(self.show_key.set_text,              "show key")
+
         louie.connect(self.update_realm_view,              "update_realm")
 
         louie.connect(self.get_command,                    "enter_command")
 
-        louie.connect(self.go_up,                          "k_main")
-        louie.connect(self.go_down,                        "j_main")
         louie.connect(self.exit,                           "q_main")
         louie.connect(self.command_line,                   ":_main")
         louie.connect(self.tickle_one_day,                 "+_main")
