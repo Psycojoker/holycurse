@@ -94,6 +94,9 @@ class MainViewList(object):
         louie.connect(self.update_main_view,               "update_main")
         louie.connect(self.update_main_view,               "1_realm")
 
+        louie.connect(self.go_up,                          "k_main")
+        louie.connect(self.go_down,                        "j_main")
+
     def update_main_view(self):
         self.content = self.fill_main_view()
         self.listbox = urwid.ListBox(self.content)
@@ -141,6 +144,21 @@ class MainViewList(object):
     def get_main_view(self):
         self.update_main_view()
         return self.content
+
+    def go_down(self):
+        self.frame.get_body().set_focus(self.position + 1)
+        #self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, urwid.Divider):
+            self.frame.get_body().set_focus(self.position + 3)
+            #self.show_key.set_text("Gotcha !")
+
+    def go_up(self):
+        if self.position > 1:
+            self.frame.get_body().set_focus(self.position - 1)
+            #self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
+            if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
+                self.frame.get_body().set_focus(self.position - 3)
+                #self.show_key.set_text("Gotcha !")
 
 class Window(object):
     def __init__(self):
@@ -515,21 +533,6 @@ class Window(object):
             self.frame.get_body().set_focus(self.position_chose_realm - 1)
             self.position_chose_realm -= 1
             self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
-
-    def go_down(self):
-        self.frame.get_body().set_focus(self.main_view.position + 1)
-        self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, urwid.Divider):
-            self.frame.get_body().set_focus(self.main_view.position + 3)
-            self.show_key.set_text("Gotcha !")
-
-    def go_up(self):
-        if self.main_view.position > 1:
-            self.frame.get_body().set_focus(self.main_view.position - 1)
-            self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
-            if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
-                self.frame.get_body().set_focus(self.main_view.position - 3)
-                self.show_key.set_text("Gotcha !")
 
 if __name__ == "__main__":
     Window().run()
