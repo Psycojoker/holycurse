@@ -8,10 +8,10 @@ import holygrail
 from datetime import datetime, timedelta, date
 
 class MissionWidget(urwid.Text):
-    def __init__(self, item):
-        if not isinstance(item, holygrail._Mission):
+    def __init__(self, mission):
+        if not isinstance(mission, holygrail._Mission):
             raise ValueError("Mission widget need a holygrail._Mission object")
-        self.item = item
+        self.mission = mission
         urwid.Text.__init__(self, self.display(), wrap="clip")
 
     def display(self):
@@ -26,39 +26,39 @@ class MissionWidget(urwid.Text):
                     return "%s minutes" % (minutes)
 
         display = ["   "]
-        old = date.today() - self.item.created_at
+        old = date.today() - self.mission.created_at
         if (old.days - 1)/7 > 0:
             display.append(("old", "|"*((old.days - 1)/7)))
             display.append(" ")
-        display.append("%s" % self.item.description)
-        if self.item.quest:
+        display.append("%s" % self.mission.description)
+        if self.mission.quest:
             display.append(" ")
-            display.append(("quest", "[%s]" % self.item.quest.description))
-        if self.item.due:
+            display.append(("quest", "[%s]" % self.mission.quest.description))
+        if self.mission.due:
             display.append(" - ")
-            if self.item.due > datetime.now():
+            if self.mission.due > datetime.now():
                 color = "date left"
-                display.append((color, "%s" % format_timedelta(datetime.now() - self.item.due)))
+                display.append((color, "%s" % format_timedelta(datetime.now() - self.mission.due)))
             else:
                 color = "date late"
-                display.append((color, "%s" % format_timedelta(self.item.due - datetime.now() )))
+                display.append((color, "%s" % format_timedelta(self.mission.due - datetime.now() )))
 
         return display
 
     def activate(self):
-        self.item.toggle()
+        self.mission.toggle()
 
     def due_today(self, days):
         if days == 1:
-            self.item.due_for(datetime.today())
+            self.mission.due_for(datetime.today())
         else:
-            self.item.due_for(datetime.today() + timedelta(days))
+            self.mission.due_for(datetime.today() + timedelta(days))
 
     def get_realm(self):
-        return self.item.realm
+        return self.mission.realm
 
     def get_quest(self):
-        return self.item.quest
+        return self.mission.quest
 
 class SeparationWidget(urwid.Text):
     def __init__(self, text):
@@ -163,7 +163,7 @@ class Window(object):
 
     def select_realm(self):
         if isinstance(self.listbox.get_focus()[0].original_widget, MissionWidget):
-            self.listbox.get_focus()[0].original_widget.item.change_realm(self.frame.get_body().get_focus()[0].original_widget.realm.id)
+            self.listbox.get_focus()[0].original_widget.mission.change_realm(self.frame.get_body().get_focus()[0].original_widget.realm.id)
         louie.send("update_main")
 
     def chose_realm(self):
@@ -265,17 +265,17 @@ class Window(object):
 
     def tickle_3_hours(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.item.tickle(datetime.now() + timedelta(hours=3))
+            self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(hours=3))
         louie.send("update_main")
 
     def tickle_one_day(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.item.tickle(datetime.now() + timedelta(days=1))
+            self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(days=1))
         louie.send("update_main")
 
     def no_due(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.item.due_for(None)
+            self.frame.get_body().get_focus()[0].original_widget.mission.due_for(None)
         louie.send("update_main")
 
     def toggle_realm_hide(self):
@@ -283,7 +283,7 @@ class Window(object):
         louie.send("update_realm")
 
     def remove_mission(self):
-        self.frame.get_body().get_focus()[0].original_widget.item.remove()
+        self.frame.get_body().get_focus()[0].original_widget.mission.remove()
         self.frame.get_body().set_focus(self.position - 1)
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
             self.frame.get_body().set_focus(self.position)
@@ -312,7 +312,7 @@ class Window(object):
         louie.send("update_realm")
 
     def toggle_mission(self):
-        mission = self.frame.get_body().get_focus()[0].original_widget.item
+        mission = self.frame.get_body().get_focus()[0].original_widget.mission
 
         if not mission.completed and mission.quest:
             self.add_new_mission_to_quest()
@@ -323,7 +323,7 @@ class Window(object):
     def toggle_n_recreate(self):
         mission = self.frame.get_body().get_focus()[0].original_widget
         mission.activate()
-        holygrail.Grail().add_mission(mission.item.description, quest=mission.get_quest(), realm=mission.get_realm())
+        holygrail.Grail().add_mission(mission.mission.description, quest=mission.get_quest(), realm=mission.get_realm())
         louie.send("update_main")
 
     def get_user_input(self):
@@ -346,7 +346,7 @@ class Window(object):
         # I got what I want, disconnect
         louie.disconnect(self.get_swap_mission_to_quest, "user_input_done")
         if self.user_input.strip():
-            old_mission = self.frame.get_body().get_focus()[0].original_widget.item
+            old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
             is_quest = holygrail.Grail().get_quest_by_desc(old_mission.description)
             if not is_quest:
                 new_quest = holygrail.Grail().add_quest(old_mission.description)
@@ -365,7 +365,7 @@ class Window(object):
     def get_next_mission_to_quest(self):
         # I got what I want, disconnect
         louie.disconnect(self.get_next_mission_to_quest, "user_input_done")
-        old_mission = self.frame.get_body().get_focus()[0].original_widget.item
+        old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
         if self.user_input.strip():
             new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
         old_mission.toggle()
@@ -417,7 +417,7 @@ class Window(object):
     def get_rename_mission(self):
         louie.disconnect(self.get_rename_mission, "user_input_done")
         if self.user_input.strip():
-            self.frame.get_body().get_focus()[0].original_widget.item.rename(self.user_input.strip())
+            self.frame.get_body().get_focus()[0].original_widget.mission.rename(self.user_input.strip())
             louie.send("update_main")
 
     def get_quest_to_current_mission(self):
@@ -427,9 +427,9 @@ class Window(object):
             is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.strip())
             if not is_quest:
                 new_quest = holygrail.Grail().add_quest(self.user_input)
-                self.frame.get_body().get_focus()[0].original_widget.item.change_quest(new_quest.id)
+                self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(new_quest.id)
             else:
-                self.frame.get_body().get_focus()[0].original_widget.item.change_quest(is_quest[0].id)
+                self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(is_quest[0].id)
             louie.send("update_main")
 
     def add_mission_to_default_realm(self):
