@@ -123,6 +123,8 @@ class MainViewList(object):
         louie.connect(self.toggle_n_recreate,              "R_main")
         louie.connect(self.toggle_mission,                 " _main")
         louie.connect(self.remove_mission,                 "d_main")
+        self.update_realm_view = lambda : louie.send("update_realm")
+        louie.connect(self.update_realm_view,              "2_main")
 
         louie.connect(self.get_user_input_main_view,       "enter_user_input")
 
@@ -323,7 +325,6 @@ class Window(object):
         louie.connect(self.add_quest_to_current_mission,   "p_main")
         louie.connect(self.swap_mission_to_quest,          "s_main")
         louie.connect(self.rename_mission,                 "r_main")
-        louie.connect(self.update_realm_view,              "2_main")
 
         louie.connect(self.move_up_realm,                  "K_realm")
         louie.connect(self.move_down_realm,                "J_realm")
