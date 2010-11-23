@@ -527,7 +527,17 @@ class Window(object):
             self.main_view.position += 1
             new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
 
-            holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm)
+            current_todo_due_date = self.frame.get_body().get_focus()[0].original_widget.mission.due
+            due_date = None
+            if current_todo_due_date:
+                if current_todo_due_date < datetime.now() + timedelta(1):
+                    due_date = datetime.now() + timedelta(1)
+                elif current_todo_due_date < datetime.now() + timedelta(4):
+                    due_date = datetime.now() + timedelta(4)
+                elif current_todo_due_date < datetime.now() + timedelta(8):
+                    due_date = datetime.now() + timedelta(8)
+
+            holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
             louie.send("update_main")
 
     def move_down_realm(self):
