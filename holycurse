@@ -126,6 +126,7 @@ class MainViewList(object):
         self.update_realm_view = lambda : louie.send("update_realm")
         louie.connect(self.update_realm_view,              "2_main")
         louie.connect(self.add_mission_to_current_realm,   "a_main")
+        louie.connect(self.add_mission_to_default_realm,   "n_main")
 
         louie.connect(self.get_user_input_main_view,       "enter_user_input")
 
@@ -297,6 +298,19 @@ class MainViewList(object):
         louie.send("set state", None, "main")
         louie.send("user_input_done")
 
+    def add_mission_to_default_realm(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Mission description: ")
+        louie.send("set state", None, "user_input")
+        louie.connect(self.get_default_realm_mission, "user_input_done")
+
+    def get_default_realm_mission(self):
+        louie.disconnect(self.get_current_realm_mission, "user_input_done")
+        if self.user_input.strip():
+            self.position += 1
+            holygrail.Grail().add_mission(self.user_input)
+            louie.send("update_main")
+
     def exit(self):
         raise urwid.ExitMainLoop()
 
@@ -345,7 +359,6 @@ class Window(object):
 
         louie.connect(self.get_command,                    "enter_command")
 
-        louie.connect(self.add_mission_to_default_realm,   "n_main")
         louie.connect(self.add_completed_mission,          "c_main")
         louie.connect(self.add_quest_to_current_mission,   "p_main")
         louie.connect(self.swap_mission_to_quest,          "s_main")
@@ -526,12 +539,6 @@ class Window(object):
                 self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(is_quest[0].id)
             louie.send("update_main")
 
-    def add_mission_to_default_realm(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input")
-        louie.connect(self.get_default_realm_mission, "user_input_done")
-
     def add_completed_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
@@ -545,13 +552,6 @@ class Window(object):
         if self.user_input.strip():
             new_mission = holygrail.Grail().add_mission(self.user_input)
             new_mission.toggle()
-
-    def get_default_realm_mission(self):
-        louie.disconnect(self.get_current_realm_mission, "user_input_done")
-        if self.user_input.strip():
-            self.main_view.position += 1
-            holygrail.Grail().add_mission(self.user_input)
-            louie.send("update_main")
 
     def move_down_realm(self):
         if self.position_chose_realm < len(holygrail.Grail().list_realms(all_realms=True)):
