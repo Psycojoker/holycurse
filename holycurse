@@ -85,14 +85,74 @@ class RealmWidget(SeparationWidget):
     def activate(self):
         self.realm.toggle_hide()
 
-class Window(object):
-    def __init__(self):
+class MainViewList(object):
+    def __init__(self, frame):
+        self.position = 0
+        self.frame = frame
+
+    def init_signals(self):
+        louie.connect(self.update_main_view,               "update_main")
+        louie.connect(self.update_main_view,               "1_realm")
+
+    def update_main_view(self):
         self.content = self.fill_main_view()
         self.listbox = urwid.ListBox(self.content)
+        self.frame.set_body(self.listbox)
+        self.content.set_focus(self.position)
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, urwid.Divider):
+            self.position -= 1
+            self.content.set_focus(self.position)
+        elif isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
+            self.position += 1
+            self.content.set_focus(self.position)
+        self.state = "main"
+
+    def fill_main_view(self):
+        super_main_view = holygrail.Grail().super_main_view()
+        last_completed_missions = holygrail.Grail().last_completed_missions()
+        if not super_main_view and not last_completed_missions:
+            return urwid.SimpleListWalker([urwid.Text("You don't have any mission, press 'n' to create a new one")])
+        main_view = []
+        for i in super_main_view:
+            # bouuuh ! ugly code !
+            try:
+                main_view.append(RealmWidget(i[0]))
+            except:
+                main_view.append(SeparationWidget(i[0]))
+            for j in i[1]:
+                main_view.append(MissionWidget(j))
+
+            main_view.append(urwid.Divider(" "))
+
+        if len(last_completed_missions) != 0:
+            a = 0
+            main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
+            for i in holygrail.Grail().last_completed_missions():
+                if a > 5:
+                    break
+                a += 1
+                main_view.append(MissionWidget(i))
+
+        to_return = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in main_view])
+
+        to_return.set_focus(1)
+        return to_return
+
+    def get_main_view(self):
+        self.update_main_view()
+        return self.content
+
+class Window(object):
+    def __init__(self):
+        self.frame = urwid.Frame(urwid.Text("haha"))
+        self.main_view = MainViewList(self.frame)
+        self.listbox = urwid.ListBox(self.main_view.get_main_view())
         self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
         self.top = urwid.AttrMap(self.show_key, 'header')
         self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', "I am before command line")), "header"), urwid.Edit("", "")])
-        self.frame = urwid.Frame(self.listbox, self.top, self.footer)
+        self.frame.set_body(self.listbox)
+        self.frame.set_header(self.top)
+        self.frame.set_footer(self.footer)
 
         palette = [('header', 'white', 'dark red'),
                    ('reveal focus', 'white', 'dark red', 'standout'),
@@ -115,7 +175,8 @@ class Window(object):
         self.loop.run()
 
     def init_signals(self):
-        louie.connect(self.update_main_view,               "update_main")
+        self.main_view.init_signals()
+
         louie.connect(self.update_realm_view,              "update_realm")
 
         louie.connect(self.get_command,                    "enter_command")
@@ -141,7 +202,6 @@ class Window(object):
         louie.connect(self.rename_mission,                 "r_main")
         louie.connect(self.update_realm_view,              "2_main")
 
-        louie.connect(self.update_main_view,               "1_realm")
         louie.connect(self.move_up_realm,                  "K_realm")
         louie.connect(self.move_down_realm,                "J_realm")
         louie.connect(self.go_up_chose_realm,              "k_realm")
@@ -192,56 +252,12 @@ class Window(object):
         else:
             return urwid.SimpleListWalker([urwid.Text("Error, you don't have any realm, something really wrong has happended")])
 
-    def update_main_view(self):
-        self.content = self.fill_main_view()
-        self.listbox = urwid.ListBox(self.content)
-        self.frame.set_body(self.listbox)
-        self.content.set_focus(self.position)
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, urwid.Divider):
-            self.position -= 1
-            self.content.set_focus(self.position)
-        elif isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
-            self.position += 1
-            self.content.set_focus(self.position)
-        self.state = "main"
-
-    def fill_main_view(self):
-        super_main_view = holygrail.Grail().super_main_view()
-        last_completed_missions = holygrail.Grail().last_completed_missions()
-        if not super_main_view and not last_completed_missions:
-            return urwid.SimpleListWalker([urwid.Text("You don't have any mission, press 'n' to create a new one")])
-        main_view = []
-        for i in super_main_view:
-            # bouuuh ! ugly code !
-            try:
-                main_view.append(RealmWidget(i[0]))
-            except:
-                main_view.append(SeparationWidget(i[0]))
-            for j in i[1]:
-                main_view.append(MissionWidget(j))
-
-            main_view.append(urwid.Divider(" "))
-
-        if len(last_completed_missions) != 0:
-            a = 0
-            main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
-            for i in holygrail.Grail().last_completed_missions():
-                if a > 5:
-                    break
-                a += 1
-                main_view.append(MissionWidget(i))
-
-        to_return = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in main_view])
-
-        to_return.set_focus(1)
-        return to_return
-
     def show_all_input(self, input, raw):
         return input
 
     def manage_input(self, input):
         if self.state == "main":
-            self.position = self.frame.get_body().get_focus()[1]
+            self.main_view.position = self.frame.get_body().get_focus()[1]
         if not louie.send("%s_%s" % (input, self.state)):
             # tuple == mouse input
             self.show_key.set_text(input if not isinstance(input, tuple) else "%s, %s, %s, %s" % input)
@@ -284,11 +300,11 @@ class Window(object):
 
     def remove_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.mission.remove()
-        self.frame.get_body().set_focus(self.position - 1)
+        self.frame.get_body().set_focus(self.main_view.position - 1)
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
-            self.frame.get_body().set_focus(self.position)
+            self.frame.get_body().set_focus(self.main_view.position)
         else:
-            self.position -= 1
+            self.main_view.position -= 1
         louie.send("update_main")
 
     def remove_realm(self):
@@ -304,11 +320,11 @@ class Window(object):
                 i.change_realm(holygrail.Grail().get_default_realm().id)
         realm.remove()
 
-        self.frame.get_body().set_focus(self.position - 1)
+        self.frame.get_body().set_focus(self.main_view.position - 1)
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
-            self.frame.get_body().set_focus(self.position)
+            self.frame.get_body().set_focus(self.main_view.position)
         else:
-            self.position -= 1
+            self.main_view.position -= 1
         louie.send("update_realm")
 
     def toggle_mission(self):
@@ -410,7 +426,7 @@ class Window(object):
     def get_new_realm(self):
         louie.disconnect(self.get_new_realm, "user_input_done")
         if self.user_input.strip():
-            self.position += 1
+            self.main_view.position += 1
             holygrail.Grail().add_realm(self.user_input)
             louie.send("update_realm")
 
@@ -455,14 +471,14 @@ class Window(object):
     def get_default_realm_mission(self):
         louie.disconnect(self.get_current_realm_mission, "user_input_done")
         if self.user_input.strip():
-            self.position += 1
+            self.main_view.position += 1
             holygrail.Grail().add_mission(self.user_input)
             louie.send("update_main")
 
     def get_current_realm_mission(self):
         louie.disconnect(self.get_current_realm_mission, "user_input_done")
         if self.user_input.strip():
-            self.position += 1
+            self.main_view.position += 1
             new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
             holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm)
             louie.send("update_main")
@@ -501,18 +517,18 @@ class Window(object):
             self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     def go_down(self):
-        self.frame.get_body().set_focus(self.position + 1)
+        self.frame.get_body().set_focus(self.main_view.position + 1)
         self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, urwid.Divider):
-            self.frame.get_body().set_focus(self.position + 3)
+            self.frame.get_body().set_focus(self.main_view.position + 3)
             self.show_key.set_text("Gotcha !")
 
     def go_up(self):
-        if self.position > 1:
-            self.frame.get_body().set_focus(self.position - 1)
+        if self.main_view.position > 1:
+            self.frame.get_body().set_focus(self.main_view.position - 1)
             self.show_key.set_text("Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
             if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
-                self.frame.get_body().set_focus(self.position - 3)
+                self.frame.get_body().set_focus(self.main_view.position - 3)
                 self.show_key.set_text("Gotcha !")
 
 if __name__ == "__main__":
