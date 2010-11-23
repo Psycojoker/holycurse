@@ -125,6 +125,7 @@ class MainViewList(object):
         louie.connect(self.remove_mission,                 "d_main")
         self.update_realm_view = lambda : louie.send("update_realm")
         louie.connect(self.update_realm_view,              "2_main")
+        louie.connect(self.add_mission_to_current_realm,   "a_main")
 
         louie.connect(self.get_user_input_main_view,       "enter_user_input")
 
@@ -261,6 +262,31 @@ class MainViewList(object):
         old_mission.toggle()
         louie.send("update_main")
 
+    def add_mission_to_current_realm(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Mission description: ")
+        louie.send("set state", None, "user_input")
+        louie.connect(self.get_current_realm_mission, "user_input_done")
+
+    def get_current_realm_mission(self):
+        louie.disconnect(self.get_current_realm_mission, "user_input_done")
+        if self.user_input.strip():
+            self.position += 1
+            new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
+
+            current_todo_due_date = self.frame.get_body().get_focus()[0].original_widget.mission.due
+            due_date = None
+            if current_todo_due_date:
+                if current_todo_due_date < datetime.now() + timedelta(1):
+                    due_date = datetime.now() + timedelta(1)
+                elif current_todo_due_date < datetime.now() + timedelta(4):
+                    due_date = datetime.now() + timedelta(4)
+                elif current_todo_due_date < datetime.now() + timedelta(8):
+                    due_date = datetime.now() + timedelta(8)
+
+            holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
+            louie.send("update_main")
+
     def get_user_input_main_view(self):
         self.frame.set_focus('body')
         # debug
@@ -319,7 +345,6 @@ class Window(object):
 
         louie.connect(self.get_command,                    "enter_command")
 
-        louie.connect(self.add_mission_to_current_realm,   "a_main")
         louie.connect(self.add_mission_to_default_realm,   "n_main")
         louie.connect(self.add_completed_mission,          "c_main")
         louie.connect(self.add_quest_to_current_mission,   "p_main")
@@ -470,12 +495,6 @@ class Window(object):
         louie.send("set state", None, "user_input")
         louie.connect(self.get_new_realm, "user_input_done")
 
-    def add_mission_to_current_realm(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input")
-        louie.connect(self.get_current_realm_mission, "user_input_done")
-
     def add_quest_to_current_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Quest description: ")
@@ -532,25 +551,6 @@ class Window(object):
         if self.user_input.strip():
             self.main_view.position += 1
             holygrail.Grail().add_mission(self.user_input)
-            louie.send("update_main")
-
-    def get_current_realm_mission(self):
-        louie.disconnect(self.get_current_realm_mission, "user_input_done")
-        if self.user_input.strip():
-            self.main_view.position += 1
-            new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
-
-            current_todo_due_date = self.frame.get_body().get_focus()[0].original_widget.mission.due
-            due_date = None
-            if current_todo_due_date:
-                if current_todo_due_date < datetime.now() + timedelta(1):
-                    due_date = datetime.now() + timedelta(1)
-                elif current_todo_due_date < datetime.now() + timedelta(4):
-                    due_date = datetime.now() + timedelta(4)
-                elif current_todo_due_date < datetime.now() + timedelta(8):
-                    due_date = datetime.now() + timedelta(8)
-
-            holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
             louie.send("update_main")
 
     def move_down_realm(self):
