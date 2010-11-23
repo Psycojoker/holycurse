@@ -113,6 +113,7 @@ class MainViewList(object):
         louie.connect(self.go_up,                          "k_main")
         louie.connect(self.go_down,                        "j_main")
         louie.connect(self.exit,                           "q_main")
+        louie.connect(self.command_line,                   ":_main")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
@@ -177,6 +178,11 @@ class MainViewList(object):
                 self.frame.get_body().set_focus(self.position - 3)
                 louie.send("show key", None, "Gotcha !")
 
+    def command_line(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().insert_text(":")
+        louie.send("set state", None, "command")
+
     def exit(self):
         raise urwid.ExitMainLoop()
 
@@ -225,7 +231,6 @@ class Window(object):
 
         louie.connect(self.get_command,                    "enter_command")
 
-        louie.connect(self.command_line,                   ":_main")
         louie.connect(self.tickle_one_day,                 "+_main")
         louie.connect(self.tickle_3_hours,                 "=_main")
         louie.connect(self.add_mission_to_current_realm,   "a_main")
@@ -521,13 +526,9 @@ class Window(object):
         if self.user_input.strip():
             self.main_view.position += 1
             new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
+
             holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm)
             louie.send("update_main")
-
-    def command_line(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().insert_text(":")
-        self.state = "command"
 
     def move_down_realm(self):
         if self.position_chose_realm < len(holygrail.Grail().list_realms(all_realms=True)):
