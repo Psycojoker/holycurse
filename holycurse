@@ -85,6 +85,22 @@ class RealmWidget(SeparationWidget):
     def activate(self):
         self.realm.toggle_hide()
 
+class State(object):
+    def __init__(self, states_set, state):
+        self.avalaible_states = states_set
+        self.state = None
+        self.set_state(state)
+        louie.connect(self.set_state, "set state")
+        louie.connect(self.get,       "get state")
+
+    def set_state(self, state):
+        if state not in self.avalaible_states:
+            raise ValueError("Unknow state: %s, should be one of those %s" % (state, self.avalaible_states))
+        self.state = state
+
+    def get(self):
+        return self.state
+
 class MainViewList(object):
     def __init__(self, frame):
         self.position = 0
@@ -109,7 +125,7 @@ class MainViewList(object):
         elif isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
             self.position += 1
             self.content.set_focus(self.position)
-        self.state = "main"
+        louie.send("set state", None, "main")
 
     def fill_main_view(self):
         super_main_view = holygrail.Grail().super_main_view()
@@ -165,7 +181,9 @@ class MainViewList(object):
         raise urwid.ExitMainLoop()
 
 class Window(object):
+
     def __init__(self):
+        self.state = State(set(("main", "command", "realm", "user_input", "chose_realm")), "main")
         self.frame = urwid.Frame(urwid.Text("haha"))
         self.main_view = MainViewList(self.frame)
         self.listbox = urwid.ListBox(self.main_view.get_main_view())
@@ -186,9 +204,11 @@ class Window(object):
                    ('mission', 'light gray', '')]
 
         self.loop = urwid.MainLoop(self.frame, palette, input_filter=self.show_all_input, unhandled_input=self.manage_input)
-        self.state = "main"
         self.init_signals()
         self.position_chose_realm = 0
+
+    def get_state(self):
+        return louie.send("get state")[0][1]
 
     def exit(self):
         raise urwid.ExitMainLoop()
@@ -253,18 +273,18 @@ class Window(object):
         listbox = urwid.ListBox(realm_list)
         listbox.set_focus(self.position_chose_realm)
         self.frame.set_body(listbox)
-        self.state = "chose_realm"
+        louie.send("set state", None, "chose_realm")
 
     def return_to_main_view(self):
         self.frame.set_body(self.listbox)
-        self.state = "main"
+        louie.send("set state", None, "main")
 
     def update_realm_view(self):
         self.content = self.fill_realm_view()
         self.listbox = urwid.ListBox(self.content)
         self.frame.set_body(self.listbox)
         self.content.set_focus(self.position_chose_realm)
-        self.state = "realm"
+        louie.send("set state", None, "realm")
 
     def fill_realm_view(self):
         context_view = [RealmWidget(i, detailled=True) for i in holygrail.Grail().list_realms(all_realms=True)]
@@ -277,9 +297,9 @@ class Window(object):
         return input
 
     def manage_input(self, input):
-        if self.state == "main":
+        if self.get_state() == "main":
             self.main_view.position = self.frame.get_body().get_focus()[1]
-        if not louie.send("%s_%s" % (input, self.state)):
+        if not louie.send("%s_%s" % (input, self.get_state())):
             # tuple == mouse input
             self.show_key.set_text(input if not isinstance(input, tuple) else "%s, %s, %s, %s" % input)
 
@@ -287,7 +307,7 @@ class Window(object):
         self.frame.set_focus('body')
         self.show_key.set_text("User input: " + self.footer.get_focus().edit_text[1:])
         self.footer.get_focus().edit_text = ""
-        self.state = "main"
+        louie.send("set state", None, "main")
 
     def due_today(self, days=1):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
@@ -370,13 +390,13 @@ class Window(object):
         self.user_input = self.footer.get_focus().edit_text
         self.footer.get_focus().edit_text = ""
         self.footer.get_focus().set_caption("")
-        self.state = "main"
+        louie.send("set state", None, "main")
         louie.send("user_input_done")
 
     def swap_mission_to_quest(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        self.state = "user_input"
+        louie.send("set state", None, "user_input")
         louie.connect(self.get_swap_mission_to_quest, "user_input_done")
 
     def get_swap_mission_to_quest(self):
@@ -396,7 +416,7 @@ class Window(object):
     def add_new_mission_to_quest(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Next mission description: ")
-        self.state = "user_input"
+        louie.send("set state", None, "user_input")
         louie.connect(self.get_next_mission_to_quest, "user_input_done")
 
     def get_next_mission_to_quest(self):
@@ -411,13 +431,13 @@ class Window(object):
     def rename_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("New mission description: ")
-        self.state = "user_input"
+        louie.send("set state", None, "user_input")
         louie.connect(self.get_rename_mission, "user_input_done")
 
     def rename_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("New realm description: ")
-        self.state = "user_input"
+        louie.send("set state", None, "user_input")
         louie.connect(self.get_rename_realm, "user_input_done")
 
     def get_rename_realm(self):
@@ -429,19 +449,19 @@ class Window(object):
     def add_new_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Realm description: ")
-        self.state = "user_input"
+        louie.send("set state", None, "user_input")
         louie.connect(self.get_new_realm, "user_input_done")
 
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        self.state = "user_input"
+        louie.send("set state", None, "user_input")
         louie.connect(self.get_current_realm_mission, "user_input_done")
 
     def add_quest_to_current_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Quest description: ")
-        self.state = "user_input"
+        louie.send("set state", None, "user_input")
         louie.connect(self.get_quest_to_current_mission, "user_input_done")
 
     def get_new_realm(self):
@@ -472,13 +492,13 @@ class Window(object):
     def add_mission_to_default_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        self.state = "user_input"
+        louie.send("set state", None, "user_input")
         louie.connect(self.get_default_realm_mission, "user_input_done")
 
     def add_completed_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        self.state = "user_input"
+        louie.send("set state", None, "user_input")
         # this is the receiver
         louie.connect(self.get_completed_mission, "user_input_done")
 
