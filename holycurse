@@ -116,6 +116,10 @@ class MainViewList(object):
         louie.connect(self.command_line,                   ":_main")
         louie.connect(self.tickle_one_day,                 "+_main")
         louie.connect(self.tickle_3_hours,                 "=_main")
+        louie.connect(self.due_today,                      "t_main")
+        louie.connect(self.due_in_3_days,                  "T_main")
+        louie.connect(self.due_this_week,                  "w_main")
+        louie.connect(self.no_due,                         "W_main")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
@@ -195,6 +199,22 @@ class MainViewList(object):
             self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(hours=3))
         louie.send("update_main")
 
+    def due_today(self, days=1):
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
+            self.frame.get_body().get_focus()[0].original_widget.due_today(days)
+        louie.send("update_main")
+
+    def due_in_3_days(self):
+        self.due_today(4)
+
+    def due_this_week(self):
+        self.due_today(8)
+
+    def no_due(self):
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
+            self.frame.get_body().get_focus()[0].original_widget.mission.due_for(None)
+        louie.send("update_main")
+
     def exit(self):
         raise urwid.ExitMainLoop()
 
@@ -249,10 +269,6 @@ class Window(object):
         louie.connect(self.toggle_n_recreate,              "R_main")
         louie.connect(self.toggle_mission,                 " _main")
         louie.connect(self.remove_mission,                 "d_main")
-        louie.connect(self.due_today,                      "t_main")
-        louie.connect(self.due_in_3_days,                  "T_main")
-        louie.connect(self.due_this_week,                  "w_main")
-        louie.connect(self.no_due,                         "W_main")
         louie.connect(self.add_quest_to_current_mission,   "p_main")
         louie.connect(self.swap_mission_to_quest,          "s_main")
         louie.connect(self.rename_mission,                 "r_main")
@@ -323,22 +339,6 @@ class Window(object):
         self.show_key.set_text("User input: " + self.footer.get_focus().edit_text[1:])
         self.footer.get_focus().edit_text = ""
         louie.send("set state", None, "main")
-
-    def due_today(self, days=1):
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.due_today(days)
-        louie.send("update_main")
-
-    def due_in_3_days(self):
-        self.due_today(4)
-
-    def due_this_week(self):
-        self.due_today(8)
-
-    def no_due(self):
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.mission.due_for(None)
-        louie.send("update_main")
 
     def toggle_realm_hide(self):
         self.frame.get_body().get_focus()[0].original_widget.activate()
