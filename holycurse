@@ -114,6 +114,7 @@ class MainViewList(object):
         louie.connect(self.go_down,                        "j_main")
         louie.connect(self.exit,                           "q_main")
         louie.connect(self.command_line,                   ":_main")
+        louie.connect(self.tickle_one_day,                 "+_main")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
@@ -183,6 +184,11 @@ class MainViewList(object):
         self.frame.get_footer().get_focus().insert_text(":")
         louie.send("set state", None, "command")
 
+    def tickle_one_day(self):
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
+            self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(days=1))
+            louie.send("update_main")
+
     def exit(self):
         raise urwid.ExitMainLoop()
 
@@ -231,7 +237,6 @@ class Window(object):
 
         louie.connect(self.get_command,                    "enter_command")
 
-        louie.connect(self.tickle_one_day,                 "+_main")
         louie.connect(self.tickle_3_hours,                 "=_main")
         louie.connect(self.add_mission_to_current_realm,   "a_main")
         louie.connect(self.add_mission_to_default_realm,   "n_main")
@@ -328,11 +333,6 @@ class Window(object):
     def tickle_3_hours(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(hours=3))
-        louie.send("update_main")
-
-    def tickle_one_day(self):
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(days=1))
         louie.send("update_main")
 
     def no_due(self):
