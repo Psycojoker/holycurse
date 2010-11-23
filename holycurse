@@ -120,6 +120,7 @@ class MainViewList(object):
         louie.connect(self.due_in_3_days,                  "T_main")
         louie.connect(self.due_this_week,                  "w_main")
         louie.connect(self.no_due,                         "W_main")
+        louie.connect(self.toggle_n_recreate,              "R_main")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
@@ -215,6 +216,12 @@ class MainViewList(object):
             self.frame.get_body().get_focus()[0].original_widget.mission.due_for(None)
         louie.send("update_main")
 
+    def toggle_n_recreate(self):
+        mission = self.frame.get_body().get_focus()[0].original_widget
+        mission.activate()
+        holygrail.Grail().add_mission(mission.mission.description, quest=mission.get_quest(), realm=mission.get_realm())
+        louie.send("update_main")
+
     def exit(self):
         raise urwid.ExitMainLoop()
 
@@ -266,7 +273,6 @@ class Window(object):
         louie.connect(self.add_mission_to_current_realm,   "a_main")
         louie.connect(self.add_mission_to_default_realm,   "n_main")
         louie.connect(self.add_completed_mission,          "c_main")
-        louie.connect(self.toggle_n_recreate,              "R_main")
         louie.connect(self.toggle_mission,                 " _main")
         louie.connect(self.remove_mission,                 "d_main")
         louie.connect(self.add_quest_to_current_mission,   "p_main")
@@ -381,12 +387,6 @@ class Window(object):
         else:
             mission.toggle()
             louie.send("update_main")
-
-    def toggle_n_recreate(self):
-        mission = self.frame.get_body().get_focus()[0].original_widget
-        mission.activate()
-        holygrail.Grail().add_mission(mission.mission.description, quest=mission.get_quest(), realm=mission.get_realm())
-        louie.send("update_main")
 
     def get_user_input(self):
         self.frame.set_focus('body')
