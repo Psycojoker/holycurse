@@ -121,7 +121,10 @@ class MainViewList(object):
         louie.connect(self.due_this_week,                  "w_main")
         louie.connect(self.no_due,                         "W_main")
         louie.connect(self.toggle_n_recreate,              "R_main")
+        louie.connect(self.toggle_mission,                 " _main")
         louie.connect(self.remove_mission,                 "d_main")
+
+        louie.connect(self.get_user_input_main_view,       "enter_user_input")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
@@ -232,6 +235,40 @@ class MainViewList(object):
             self.position -= 1
         louie.send("update_main")
 
+    def toggle_mission(self):
+        mission = self.frame.get_body().get_focus()[0].original_widget.mission
+
+        if not mission.completed and mission.quest:
+            self.add_new_mission_to_quest()
+        else:
+            mission.toggle()
+            louie.send("update_main")
+
+    def add_new_mission_to_quest(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Next mission description: ")
+        louie.send("set state", None, "user_input")
+        louie.connect(self.get_next_mission_to_quest, "user_input_done")
+
+    def get_next_mission_to_quest(self):
+        # I got what I want, disconnect
+        louie.disconnect(self.get_next_mission_to_quest, "user_input_done")
+        old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
+        if self.user_input.strip():
+            new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
+        old_mission.toggle()
+        louie.send("update_main")
+
+    def get_user_input_main_view(self):
+        self.frame.set_focus('body')
+        # debug
+        louie.send("show key", None, "Mission description: " + self.frame.footer.get_focus().edit_text)
+        self.user_input = self.frame.footer.get_focus().edit_text
+        self.frame.footer.get_focus().edit_text = ""
+        self.frame.footer.get_focus().set_caption("")
+        louie.send("set state", None, "main")
+        louie.send("user_input_done")
+
     def exit(self):
         raise urwid.ExitMainLoop()
 
@@ -283,7 +320,6 @@ class Window(object):
         louie.connect(self.add_mission_to_current_realm,   "a_main")
         louie.connect(self.add_mission_to_default_realm,   "n_main")
         louie.connect(self.add_completed_mission,          "c_main")
-        louie.connect(self.toggle_mission,                 " _main")
         louie.connect(self.add_quest_to_current_mission,   "p_main")
         louie.connect(self.swap_mission_to_quest,          "s_main")
         louie.connect(self.rename_mission,                 "r_main")
@@ -379,15 +415,6 @@ class Window(object):
             self.main_view.position -= 1
         louie.send("update_realm")
 
-    def toggle_mission(self):
-        mission = self.frame.get_body().get_focus()[0].original_widget.mission
-
-        if not mission.completed and mission.quest:
-            self.add_new_mission_to_quest()
-        else:
-            mission.toggle()
-            louie.send("update_main")
-
     def get_user_input(self):
         self.frame.set_focus('body')
         # debug
@@ -417,21 +444,6 @@ class Window(object):
                 old_mission.change_quest(is_quest[0].id)
             old_mission.rename(self.user_input)
             louie.send("update_main")
-
-    def add_new_mission_to_quest(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Next mission description: ")
-        louie.send("set state", None, "user_input")
-        louie.connect(self.get_next_mission_to_quest, "user_input_done")
-
-    def get_next_mission_to_quest(self):
-        # I got what I want, disconnect
-        louie.disconnect(self.get_next_mission_to_quest, "user_input_done")
-        old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
-        if self.user_input.strip():
-            new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
-        old_mission.toggle()
-        louie.send("update_main")
 
     def rename_mission(self):
         self.frame.set_focus('footer')
