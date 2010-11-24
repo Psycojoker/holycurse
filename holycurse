@@ -393,6 +393,7 @@ class RealmList(object):
         louie.connect(self.go_down,                        "j_realm")
         louie.connect(self.move_up_realm,                  "K_realm")
         louie.connect(self.move_down_realm,                "J_realm")
+        louie.connect(self.toggle_realm_hide,              " _realm")
 
     def go_down(self):
         # really unoptimised if
@@ -420,6 +421,10 @@ class RealmList(object):
             realm.change_position(realm.position - 1)
             self.position -= 1
             louie.send("update_realm")
+
+    def toggle_realm_hide(self):
+        self.frame.get_body().get_focus()[0].original_widget.activate()
+        louie.send("update_realm")
 
 class Window(object):
 
@@ -471,7 +476,6 @@ class Window(object):
 
         louie.connect(self.get_command,                    "enter_command")
 
-        louie.connect(self.toggle_realm_hide,              " _realm")
         louie.connect(self.add_new_realm,                  "a_realm")
         louie.connect(self.add_new_realm,                  "n_realm")
         louie.connect(self.rename_realm,                   "r_realm")
@@ -532,10 +536,6 @@ class Window(object):
         self.show_key.set_text("User input: " + self.footer.get_focus().edit_text[1:])
         self.footer.get_focus().edit_text = ""
         louie.send("set state", None, "main")
-
-    def toggle_realm_hide(self):
-        self.frame.get_body().get_focus()[0].original_widget.activate()
-        louie.send("update_realm")
 
     def remove_realm(self):
         realm = self.frame.get_body().get_focus()[0].original_widget.realm
