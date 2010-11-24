@@ -389,7 +389,21 @@ class RealmList(object):
         self.frame = frame
 
     def init_signals(self):
-        pass
+        louie.connect(self.go_up,              "k_realm")
+        louie.connect(self.go_down,            "j_realm")
+
+    def go_down(self):
+        # really unoptimised if
+        if self.position < len(holygrail.Grail().list_realms(all_realms=True)):
+            self.frame.get_body().set_focus(self.position + 1)
+            self.position += 1
+            louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
+
+    def go_up(self):
+        if self.position > 0:
+            self.frame.get_body().set_focus(self.position - 1)
+            self.position -= 1
+            louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
 class Window(object):
 
@@ -443,8 +457,6 @@ class Window(object):
 
         louie.connect(self.move_up_realm,                  "K_realm")
         louie.connect(self.move_down_realm,                "J_realm")
-        louie.connect(self.go_up_chose_realm,              "k_realm")
-        louie.connect(self.go_down_chose_realm,            "j_realm")
         louie.connect(self.toggle_realm_hide,              " _realm")
         louie.connect(self.add_new_realm,                  "a_realm")
         louie.connect(self.add_new_realm,                  "n_realm")
