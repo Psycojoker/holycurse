@@ -383,13 +383,25 @@ class MainViewList(object):
     def exit(self):
         raise urwid.ExitMainLoop()
 
+class RealmList(object):
+    def __init__(self, frame):
+        self.position = 0
+        self.frame = frame
+
+    def init_signals(self):
+        pass
+
 class Window(object):
 
     def __init__(self):
         self.state = State(set(("main", "command", "realm", "user_input", "chose_realm")), "main")
         self.frame = urwid.Frame(urwid.Text(""))
+
         self.main_view = MainViewList(self.frame)
         self.listbox = urwid.ListBox(self.main_view.get_main_view())
+
+        self.realm_view = RealmList(self.frame)
+
         self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
         self.top = urwid.AttrMap(self.show_key, 'header')
         self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', "I am before command line")), "header"), urwid.Edit("", "")])
@@ -421,6 +433,7 @@ class Window(object):
 
     def init_signals(self):
         self.main_view.init_signals()
+        self.realm_view.init_signals()
 
         louie.connect(self.show_key.set_text,              "show key")
 
