@@ -389,8 +389,10 @@ class RealmList(object):
         self.frame = frame
 
     def init_signals(self):
-        louie.connect(self.go_up,              "k_realm")
-        louie.connect(self.go_down,            "j_realm")
+        louie.connect(self.go_up,                          "k_realm")
+        louie.connect(self.go_down,                        "j_realm")
+        louie.connect(self.move_up_realm,                  "K_realm")
+        louie.connect(self.move_down_realm,                "J_realm")
 
     def go_down(self):
         # really unoptimised if
@@ -404,6 +406,21 @@ class RealmList(object):
             self.frame.get_body().set_focus(self.position - 1)
             self.position -= 1
             louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
+
+    def move_down_realm(self):
+        if self.position < len(holygrail.Grail().list_realms(all_realms=True)):
+            realm = self.frame.get_body().get_focus()[0].original_widget.realm
+            a = realm.position
+            realm.change_position(realm.position + 1)
+            self.position += 1
+            louie.send("update_realm")
+
+    def move_up_realm(self):
+        if self.position > 0:
+            realm = self.frame.get_body().get_focus()[0].original_widget.realm
+            realm.change_position(realm.position - 1)
+            self.position -= 1
+            louie.send("update_realm")
 
 class Window(object):
 
@@ -455,8 +472,6 @@ class Window(object):
 
         louie.connect(self.get_command,                    "enter_command")
 
-        louie.connect(self.move_up_realm,                  "K_realm")
-        louie.connect(self.move_down_realm,                "J_realm")
         louie.connect(self.toggle_realm_hide,              " _realm")
         louie.connect(self.add_new_realm,                  "a_realm")
         louie.connect(self.add_new_realm,                  "n_realm")
@@ -576,21 +591,6 @@ class Window(object):
         if self.user_input.strip():
             self.main_view.position += 1
             holygrail.Grail().add_realm(self.user_input)
-            louie.send("update_realm")
-
-    def move_down_realm(self):
-        if self.position_chose_realm < len(holygrail.Grail().list_realms(all_realms=True)):
-            realm = self.frame.get_body().get_focus()[0].original_widget.realm
-            a = realm.position
-            realm.change_position(realm.position + 1)
-            self.position_chose_realm += 1
-            louie.send("update_realm")
-
-    def move_up_realm(self):
-        if self.position_chose_realm > 0:
-            realm = self.frame.get_body().get_focus()[0].original_widget.realm
-            realm.change_position(realm.position - 1)
-            self.position_chose_realm -= 1
             louie.send("update_realm")
 
     def go_down_chose_realm(self):
