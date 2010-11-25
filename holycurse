@@ -395,6 +395,13 @@ class RealmList(object):
         louie.connect(self.move_up_realm,                  "K_realm")
         louie.connect(self.move_down_realm,                "J_realm")
         louie.connect(self.toggle_realm_hide,              " _realm")
+        louie.connect(self.exit,                           "q_realm")
+        louie.connect(self.rename_realm,                   "r_realm")
+        louie.connect(self.add_new_realm,                  "a_realm")
+        louie.connect(self.add_new_realm,                  "n_realm")
+        louie.connect(self.remove_realm,                   "d_realm")
+
+        louie.connect(self.get_user_input_realm,           "enter_user_input_realm")
 
     def go_down(self):
         # really unoptimised if
@@ -425,6 +432,64 @@ class RealmList(object):
 
     def toggle_realm_hide(self):
         self.frame.get_body().get_focus()[0].original_widget.activate()
+        louie.send("update_realm")
+
+    def exit(self):
+        raise urwid.ExitMainLoop()
+
+    def rename_realm(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("New realm description: ")
+        louie.send("set state", None, "user_input_realm")
+        louie.connect(self.get_rename_realm, "user_input_done")
+
+    def get_rename_realm(self):
+        louie.disconnect(self.get_rename_realm, "user_input_done")
+        if self.user_input.strip():
+            self.frame.get_body().get_focus()[0].original_widget.realm.rename(self.user_input.strip())
+            louie.send("update_realm")
+
+    def get_user_input_realm(self):
+        self.frame.set_focus('body')
+        # debug
+        louie.send("show key", None, "Mission description: " + self.frame.get_footer().get_focus().edit_text)
+        self.user_input = self.frame.get_footer().get_focus().edit_text
+        self.frame.get_footer().get_focus().edit_text = ""
+        self.frame.get_footer().get_focus().set_caption("")
+        louie.send("set state", None, "main")
+        louie.send("user_input_done")
+
+    def add_new_realm(self):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption("Realm description: ")
+        louie.send("set state", None, "user_input_realm")
+        louie.connect(self.get_new_realm, "user_input_done")
+
+    def get_new_realm(self):
+        louie.disconnect(self.get_new_realm, "user_input_done")
+        if self.user_input.strip():
+            self.position += 1
+            holygrail.Grail().add_realm(self.user_input)
+            louie.send("update_realm")
+
+    def remove_realm(self):
+        realm = self.frame.get_body().get_focus()[0].original_widget.realm
+        if realm.default_realm:
+            # TODO display error
+            return
+        all_missions = realm.get_missions(all_missions=True)
+
+        # I can't delete a realm with mission, so move all the missions to the default realm
+        if all_missions:
+            for i in all_missions:
+                i.change_realm(holygrail.Grail().get_default_realm().id)
+        realm.remove()
+
+        self.frame.get_body().set_focus(self.position - 1)
+        if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
+            self.frame.get_body().set_focus(self.position)
+        else:
+            self.position -= 1
         louie.send("update_realm")
 
 class Window(object):
@@ -476,12 +541,6 @@ class Window(object):
         louie.connect(self.update_realm_view,              "update_realm")
 
         louie.connect(self.get_command,                    "enter_command")
-
-        louie.connect(self.add_new_realm,                  "a_realm")
-        louie.connect(self.add_new_realm,                  "n_realm")
-        louie.connect(self.rename_realm,                   "r_realm")
-        louie.connect(self.remove_realm,                   "d_realm")
-        louie.connect(self.exit,                           "q_realm")
 
         louie.connect(self.get_user_input,                 "enter_user_input")
 
@@ -538,26 +597,6 @@ class Window(object):
         self.footer.get_focus().edit_text = ""
         louie.send("set state", None, "main")
 
-    def remove_realm(self):
-        realm = self.frame.get_body().get_focus()[0].original_widget.realm
-        if realm.default_realm:
-            # TODO display error
-            return
-        all_missions = realm.get_missions(all_missions=True)
-
-        # I can't delete a realm with mission, so move all the missions to the default realm
-        if all_missions:
-            for i in all_missions:
-                i.change_realm(holygrail.Grail().get_default_realm().id)
-        realm.remove()
-
-        self.frame.get_body().set_focus(self.main_view.position - 1)
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
-            self.frame.get_body().set_focus(self.main_view.position)
-        else:
-            self.main_view.position -= 1
-        louie.send("update_realm")
-
     def get_user_input(self):
         self.frame.set_focus('body')
         # debug
@@ -567,31 +606,6 @@ class Window(object):
         self.footer.get_focus().set_caption("")
         louie.send("set state", None, "main")
         louie.send("user_input_done")
-
-    def rename_realm(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("New realm description: ")
-        louie.send("set state", None, "user_input")
-        louie.connect(self.get_rename_realm, "user_input_done")
-
-    def get_rename_realm(self):
-        louie.disconnect(self.get_rename_realm, "user_input_done")
-        if self.user_input.strip():
-            self.frame.get_body().get_focus()[0].original_widget.realm.rename(self.user_input.strip())
-            louie.send("update_realm")
-
-    def add_new_realm(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Realm description: ")
-        louie.send("set state", None, "user_input")
-        louie.connect(self.get_new_realm, "user_input_done")
-
-    def get_new_realm(self):
-        louie.disconnect(self.get_new_realm, "user_input_done")
-        if self.user_input.strip():
-            self.main_view.position += 1
-            holygrail.Grail().add_realm(self.user_input)
-            louie.send("update_realm")
 
     def go_down_chose_realm(self):
         # really unoptimised if
