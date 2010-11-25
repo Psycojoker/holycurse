@@ -133,7 +133,7 @@ class MainViewList(object):
         louie.connect(self.rename_mission,                 "r_main")
 
 
-        louie.connect(self.get_user_input_main_view,       "enter_user_input")
+        louie.connect(self.get_user_input_main_view,       "enter_user_input_main")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
@@ -256,7 +256,7 @@ class MainViewList(object):
     def add_new_mission_to_quest(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Next mission description: ")
-        louie.send("set state", None, "user_input")
+        louie.send("set state", None, "user_input_main")
         louie.connect(self.get_next_mission_to_quest, "user_input_done")
 
     def get_next_mission_to_quest(self):
@@ -271,7 +271,7 @@ class MainViewList(object):
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input")
+        louie.send("set state", None, "user_input_main")
         louie.connect(self.get_current_realm_mission, "user_input_done")
 
     def get_current_realm_mission(self):
@@ -306,7 +306,7 @@ class MainViewList(object):
     def add_mission_to_default_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input")
+        louie.send("set state", None, "user_input_main")
         louie.connect(self.get_default_realm_mission, "user_input_done")
 
     def get_default_realm_mission(self):
@@ -319,7 +319,7 @@ class MainViewList(object):
     def add_completed_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input")
+        louie.send("set state", None, "user_input_main")
         # this is the receiver
         louie.connect(self.get_completed_mission, "user_input_done")
 
@@ -333,7 +333,7 @@ class MainViewList(object):
     def add_quest_to_current_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Quest description: ")
-        louie.send("set state", None, "user_input")
+        louie.send("set state", None, "user_input_main")
         louie.connect(self.get_quest_to_current_mission, "user_input_done")
 
     def get_quest_to_current_mission(self):
@@ -351,7 +351,7 @@ class MainViewList(object):
     def swap_mission_to_quest(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input")
+        louie.send("set state", None, "user_input_main")
         louie.connect(self.get_swap_mission_to_quest, "user_input_done")
 
     def get_swap_mission_to_quest(self):
@@ -371,7 +371,7 @@ class MainViewList(object):
     def rename_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("New mission description: ")
-        louie.send("set state", None, "user_input")
+        louie.send("set state", None, "user_input_main")
         louie.connect(self.get_rename_mission, "user_input_done")
 
     def get_rename_mission(self):
@@ -387,6 +387,7 @@ class RealmList(object):
     def __init__(self, frame):
         self.position = 0
         self.frame = frame
+        self.user_input = ""
 
     def init_signals(self):
         louie.connect(self.go_up,                          "k_realm")
@@ -429,7 +430,7 @@ class RealmList(object):
 class Window(object):
 
     def __init__(self):
-        self.state = State(set(("main", "command", "realm", "user_input", "chose_realm")), "main")
+        self.state = State(set(("main", "command", "realm", "user_input", "chose_realm", "user_input_main", "user_input_realm")), "main")
         self.frame = urwid.Frame(urwid.Text(""))
 
         self.main_view = MainViewList(self.frame)
