@@ -165,7 +165,7 @@ class MainViewList(object):
 
             main_view.append(urwid.Divider(" "))
 
-        if len(last_completed_missions) != 0:
+        if last_completed_missions:
             a = 0
             main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
             for i in holygrail.Grail().last_completed_missions():
