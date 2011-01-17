@@ -13,6 +13,12 @@ def update_main(func):
         louie.send("update_main")
     return _update_main
 
+def disconnect(func):
+    def _disconnect(*args):
+        louie.disconnect(func, "user_input_done")
+        func(*args)
+    return _disconnect
+
 class MissionWidget(urwid.Text):
     def __init__(self, mission):
         if not isinstance(mission, holygrail._Mission):
@@ -267,9 +273,9 @@ class MainViewList(object):
         louie.send("set state", None, "user_input_main")
         louie.connect(self.get_next_mission_to_quest, "user_input_done")
 
+    @disconnect
     def get_next_mission_to_quest(self):
         # I got what I want, disconnect
-        louie.disconnect(self.get_next_mission_to_quest, "user_input_done")
         old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
         if self.user_input.strip():
             new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
@@ -281,8 +287,8 @@ class MainViewList(object):
         louie.send("set state", None, "user_input_main")
         louie.connect(self.get_current_realm_mission, "user_input_done")
 
+    @disconnect
     def get_current_realm_mission(self):
-        louie.disconnect(self.get_current_realm_mission, "user_input_done")
         if self.user_input.strip():
             self.position += 1
             new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
@@ -316,8 +322,8 @@ class MainViewList(object):
         louie.send("set state", None, "user_input_main")
         louie.connect(self.get_default_realm_mission, "user_input_done")
 
+    @disconnect
     def get_default_realm_mission(self):
-        louie.disconnect(self.get_current_realm_mission, "user_input_done")
         if self.user_input.strip():
             self.position += 1
             holygrail.Grail().add_mission(self.user_input)
@@ -330,9 +336,8 @@ class MainViewList(object):
         # this is the receiver
         louie.connect(self.get_completed_mission, "user_input_done")
 
+    @disconnect
     def get_completed_mission(self):
-        # I got what I want, disconnect
-        louie.disconnect(self.get_completed_mission, "user_input_done")
         if self.user_input.strip():
             new_mission = holygrail.Grail().add_mission(self.user_input)
             new_mission.toggle()
@@ -343,9 +348,8 @@ class MainViewList(object):
         louie.send("set state", None, "user_input_main")
         louie.connect(self.get_quest_to_current_mission, "user_input_done")
 
+    @disconnect
     def get_quest_to_current_mission(self):
-        # I got what I want, disconnect
-        louie.disconnect(self.get_quest_to_current_mission, "user_input_done")
         if self.user_input.strip():
             is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.strip())
             if not is_quest:
@@ -361,9 +365,8 @@ class MainViewList(object):
         louie.send("set state", None, "user_input_main")
         louie.connect(self.get_swap_mission_to_quest, "user_input_done")
 
+    @disconnect
     def get_swap_mission_to_quest(self):
-        # I got what I want, disconnect
-        louie.disconnect(self.get_swap_mission_to_quest, "user_input_done")
         if self.user_input.strip():
             old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
             is_quest = holygrail.Grail().get_quest_by_desc(old_mission.description)
@@ -381,8 +384,8 @@ class MainViewList(object):
         louie.send("set state", None, "user_input_main")
         louie.connect(self.get_rename_mission, "user_input_done")
 
+    @disconnect
     def get_rename_mission(self):
-        louie.disconnect(self.get_rename_mission, "user_input_done")
         if self.user_input.strip():
             self.frame.get_body().get_focus()[0].original_widget.mission.rename(self.user_input.strip())
             louie.send("update_main")
@@ -450,8 +453,8 @@ class RealmList(object):
         louie.send("set state", None, "user_input_realm")
         louie.connect(self.get_rename_realm, "user_input_done")
 
+    @disconnect
     def get_rename_realm(self):
-        louie.disconnect(self.get_rename_realm, "user_input_done")
         if self.user_input.strip():
             self.frame.get_body().get_focus()[0].original_widget.realm.rename(self.user_input.strip())
             louie.send("update_realm")
@@ -472,8 +475,8 @@ class RealmList(object):
         louie.send("set state", None, "user_input_realm")
         louie.connect(self.get_new_realm, "user_input_done")
 
+    @disconnect
     def get_new_realm(self):
-        louie.disconnect(self.get_new_realm, "user_input_done")
         if self.user_input.strip():
             self.position += 1
             holygrail.Grail().add_realm(self.user_input)
