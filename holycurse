@@ -156,11 +156,10 @@ class MainViewList(object):
             return urwid.SimpleListWalker([urwid.Text("You don't have any mission, press 'n' to create a new one")])
         main_view = []
         for i in super_main_view:
-            # bouuuh ! ugly code !
-            try:
-                main_view.append(RealmWidget(i[0]))
-            except:
+            if isinstance(i[0], str):
                 main_view.append(SeparationWidget(i[0]))
+            else:
+                main_view.append(RealmWidget(i[0]))
             for j in i[1]:
                 main_view.append(MissionWidget(j))
 
