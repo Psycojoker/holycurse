@@ -19,6 +19,13 @@ def disconnect(func):
         func(*args)
     return _disconnect
 
+def have_input(func):
+    def _have_input(*args):
+        # ugly, to get "self"
+        if args[0].user_input.strip():
+            func(*args)
+    return _have_input
+
 class MissionWidget(urwid.Text):
     def __init__(self, mission):
         if not isinstance(mission, holygrail._Mission):
@@ -288,23 +295,23 @@ class MainViewList(object):
         louie.connect(self.get_current_realm_mission, "user_input_done")
 
     @disconnect
+    @have_input
     def get_current_realm_mission(self):
-        if self.user_input.strip():
-            self.position += 1
-            new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
+        self.position += 1
+        new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
 
-            current_todo_due_date = self.frame.get_body().get_focus()[0].original_widget.mission.due
-            due_date = None
-            if current_todo_due_date:
-                if current_todo_due_date < datetime.now() + timedelta(1):
-                    due_date = datetime.now() + timedelta(1)
-                elif current_todo_due_date < datetime.now() + timedelta(4):
-                    due_date = datetime.now() + timedelta(4)
-                elif current_todo_due_date < datetime.now() + timedelta(8):
-                    due_date = datetime.now() + timedelta(8)
+        current_todo_due_date = self.frame.get_body().get_focus()[0].original_widget.mission.due
+        due_date = None
+        if current_todo_due_date:
+            if current_todo_due_date < datetime.now() + timedelta(1):
+                due_date = datetime.now() + timedelta(1)
+            elif current_todo_due_date < datetime.now() + timedelta(4):
+                due_date = datetime.now() + timedelta(4)
+            elif current_todo_due_date < datetime.now() + timedelta(8):
+                due_date = datetime.now() + timedelta(8)
 
-            holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
-            louie.send("update_main")
+        holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
+        louie.send("update_main")
 
     def get_user_input_main_view(self):
         self.frame.set_focus('body')
@@ -323,11 +330,11 @@ class MainViewList(object):
         louie.connect(self.get_default_realm_mission, "user_input_done")
 
     @disconnect
+    @have_input
     def get_default_realm_mission(self):
-        if self.user_input.strip():
-            self.position += 1
-            holygrail.Grail().add_mission(self.user_input)
-            louie.send("update_main")
+        self.position += 1
+        holygrail.Grail().add_mission(self.user_input)
+        louie.send("update_main")
 
     def add_completed_mission(self):
         self.frame.set_focus('footer')
@@ -337,10 +344,10 @@ class MainViewList(object):
         louie.connect(self.get_completed_mission, "user_input_done")
 
     @disconnect
+    @have_input
     def get_completed_mission(self):
-        if self.user_input.strip():
-            new_mission = holygrail.Grail().add_mission(self.user_input)
-            new_mission.toggle()
+        new_mission = holygrail.Grail().add_mission(self.user_input)
+        new_mission.toggle()
 
     def add_quest_to_current_mission(self):
         self.frame.set_focus('footer')
@@ -349,15 +356,15 @@ class MainViewList(object):
         louie.connect(self.get_quest_to_current_mission, "user_input_done")
 
     @disconnect
+    @have_input
     def get_quest_to_current_mission(self):
-        if self.user_input.strip():
-            is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.strip())
-            if not is_quest:
-                new_quest = holygrail.Grail().add_quest(self.user_input)
-                self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(new_quest.id)
-            else:
-                self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(is_quest[0].id)
-            louie.send("update_main")
+        is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.strip())
+        if not is_quest:
+            new_quest = holygrail.Grail().add_quest(self.user_input)
+            self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(new_quest.id)
+        else:
+            self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(is_quest[0].id)
+        louie.send("update_main")
 
     def swap_mission_to_quest(self):
         self.frame.set_focus('footer')
@@ -366,17 +373,17 @@ class MainViewList(object):
         louie.connect(self.get_swap_mission_to_quest, "user_input_done")
 
     @disconnect
+    @have_input
     def get_swap_mission_to_quest(self):
-        if self.user_input.strip():
-            old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
-            is_quest = holygrail.Grail().get_quest_by_desc(old_mission.description)
-            if not is_quest:
-                new_quest = holygrail.Grail().add_quest(old_mission.description)
-                old_mission.change_quest(new_quest.id)
-            else:
-                old_mission.change_quest(is_quest[0].id)
-            old_mission.rename(self.user_input)
-            louie.send("update_main")
+        old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
+        is_quest = holygrail.Grail().get_quest_by_desc(old_mission.description)
+        if not is_quest:
+            new_quest = holygrail.Grail().add_quest(old_mission.description)
+            old_mission.change_quest(new_quest.id)
+        else:
+            old_mission.change_quest(is_quest[0].id)
+        old_mission.rename(self.user_input)
+        louie.send("update_main")
 
     def rename_mission(self):
         self.frame.set_focus('footer')
@@ -385,10 +392,10 @@ class MainViewList(object):
         louie.connect(self.get_rename_mission, "user_input_done")
 
     @disconnect
+    @have_input
     def get_rename_mission(self):
-        if self.user_input.strip():
-            self.frame.get_body().get_focus()[0].original_widget.mission.rename(self.user_input.strip())
-            louie.send("update_main")
+        self.frame.get_body().get_focus()[0].original_widget.mission.rename(self.user_input.strip())
+        louie.send("update_main")
 
     def exit(self):
         raise urwid.ExitMainLoop()
@@ -476,11 +483,11 @@ class RealmList(object):
         louie.connect(self.get_new_realm, "user_input_done")
 
     @disconnect
+    @have_input
     def get_new_realm(self):
-        if self.user_input.strip():
-            self.position += 1
-            holygrail.Grail().add_realm(self.user_input)
-            louie.send("update_realm")
+        self.position += 1
+        holygrail.Grail().add_realm(self.user_input)
+        louie.send("update_realm")
 
     def remove_realm(self):
         realm = self.frame.get_body().get_focus()[0].original_widget.realm
