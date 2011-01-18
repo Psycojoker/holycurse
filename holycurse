@@ -296,6 +296,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
+    @update_main
     def get_current_realm_mission(self):
         self.position += 1
         new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
@@ -311,7 +312,6 @@ class MainViewList(object):
                 due_date = datetime.now() + timedelta(8)
 
         holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
-        louie.send("update_main")
 
     def get_user_input_main_view(self):
         self.frame.set_focus('body')
@@ -331,10 +331,10 @@ class MainViewList(object):
 
     @disconnect
     @have_input
+    @update_main
     def get_default_realm_mission(self):
         self.position += 1
         holygrail.Grail().add_mission(self.user_input)
-        louie.send("update_main")
 
     def add_completed_mission(self):
         self.frame.set_focus('footer')
