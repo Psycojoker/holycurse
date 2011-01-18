@@ -202,7 +202,6 @@ class MainViewList(object):
         louie.connect(self.swap_mission_to_quest,          "s_main")
         louie.connect(self.rename_mission,                 "r_main")
 
-
         louie.connect(self.get_user_input_main_view,       "enter_user_input_main")
 
     def update_main_view(self):
