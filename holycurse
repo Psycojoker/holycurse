@@ -13,6 +13,14 @@ def cant_be_call_on_empty_mainview(func):
             func(*args)
     return _cant_be_call_on_empty_mainview
 
+def update_current_item(func):
+    def _update_current_item(*args):
+        self = args[0]
+        item = func(*args)
+        self.content[self.position].original_widget.update()
+
+    return _update_current_item
+
 def remove_current_item(func):
     def _remove_current_item(*args):
         self = args[0]
@@ -83,6 +91,9 @@ class MissionWidget(urwid.Text):
             raise ValueError("Mission widget need a holygrail._Mission object")
         self.mission = mission
         urwid.Text.__init__(self, self.display(), wrap="clip")
+
+    def update(self):
+        self.set_text(self.display())
 
     def display(self):
         def format_timedelta(td):
@@ -418,7 +429,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @update_main
+    @update_current_item
     def get_quest_to_current_mission(self):
         is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.strip())
         if not is_quest:
@@ -436,7 +447,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @update_main
+    @update_current_item
     def get_swap_mission_to_quest(self):
         old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
         is_quest = holygrail.Grail().get_quest_by_desc(old_mission.description)
@@ -456,7 +467,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @update_main
+    @update_current_item
     def get_rename_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.mission.rename(self.user_input.strip())
 
