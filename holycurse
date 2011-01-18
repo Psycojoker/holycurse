@@ -7,6 +7,45 @@ import holygrail
 
 from datetime import datetime, timedelta, date
 
+def remove_current_item(func):
+    def _remove_current_item(*args):
+        self = args[0]
+        save_position = self.position
+        item = func(*args)
+        self.content.pop(save_position)
+
+        # only one existing todo
+        if len(self.content) == 1:
+            # call usual update, the difference won't value to code some
+            #c specifique optimisations
+            louie.send("update_main")
+
+        # at the end of the list
+        elif len(self.content) <= self.position:
+            # clean useless stuff
+            self.content.pop(self.position - 1)
+            self.content.pop(self.position - 2)
+            # go down if not at bottom, else go to one
+            self.position = self.position - 3 if (self.position - 3) > 0 else 1
+            # nothing in the list ? go to 0
+            if len(self.content) == 1:
+                self.position = 0
+            self.content.set_focus(self.position)
+
+        # have remove everything from a realm
+        elif isinstance(self.content[self.position].original_widget, urwid.Divider):
+            # clean useless stuff
+            self.content.pop(self.position)
+            self.content.pop(self.position - 1)
+            # go down if not at bottom, else go to one
+            self.position = self.position - 3 if (self.position - 3) > 0 else 1
+            # nothing in the list ? go to 0
+            if len(self.content) == 1:
+                self.position = 1
+            self.content.set_focus(self.position)
+
+    return _remove_current_item
+
 def update_main(func):
     def _update_main(*args):
         func(*args)
@@ -224,12 +263,12 @@ class MainViewList(object):
         self.frame.get_footer().get_focus().insert_text(":")
         louie.send("set state", None, "command")
 
-    @update_main
+    @remove_current_item
     def tickle_one_day(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(days=1))
 
-    @update_main
+    @remove_current_item
     def tickle_3_hours(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(hours=3))
@@ -256,7 +295,7 @@ class MainViewList(object):
         mission.activate()
         holygrail.Grail().add_mission(mission.mission.description, quest=mission.get_quest(), realm=mission.get_realm())
 
-    @update_main
+    @remove_current_item
     def remove_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.mission.remove()
         self.frame.get_body().set_focus(self.position - 1)
