@@ -15,7 +15,7 @@ def update_main(func):
 
 def disconnect(func):
     def _disconnect(*args):
-        louie.disconnect(func, "user_input_done")
+        map(lambda i: louie.disconnect(i(), "user_input_done"), louie.get_all_receivers(signal="user_input_done"))
         func(*args)
     return _disconnect
 
