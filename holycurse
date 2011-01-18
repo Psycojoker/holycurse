@@ -423,14 +423,14 @@ class RealmList(object):
     def go_down(self):
         # really unoptimised if
         if self.position < len(holygrail.Grail().list_realms(all_realms=True)):
-            self.frame.get_body().set_focus(self.position + 1)
             self.position += 1
+            self.frame.get_body().set_focus(self.position)
             louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     def go_up(self):
         if self.position > 0:
-            self.frame.get_body().set_focus(self.position - 1)
             self.position -= 1
+            self.frame.get_body().set_focus(self.position)
             louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     def move_down_realm(self):
