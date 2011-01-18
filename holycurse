@@ -634,7 +634,7 @@ class Window(object):
         self.frame = urwid.Frame(urwid.Text(""))
 
         self.main_view = MainViewList(self.frame)
-        self.listbox = urwid.ListBox(self.main_view.get_main_view())
+        self.main_view.get_main_view()
 
         self.realm_view = RealmList(self.frame)
         self.choose_realm = ChooseRealmList(self.frame, self.main_view)
@@ -642,7 +642,6 @@ class Window(object):
         self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
         self.top = urwid.AttrMap(self.show_key, 'header')
         self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', "I am before command line")), "header"), urwid.Edit("", "")])
-        self.frame.set_body(self.listbox)
         self.frame.set_header(self.top)
         self.frame.set_footer(self.footer)
 
