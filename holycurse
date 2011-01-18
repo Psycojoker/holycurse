@@ -630,7 +630,9 @@ class RealmList(object):
 class Window(object):
 
     def __init__(self):
-        self.state = State(set(("main", "command", "realm", "user_input", "chose_realm", "user_input_main", "user_input_realm")), "main")
+        self.state = State(set(("main", "command", "realm", "user_input",
+                                "chose_realm", "user_input_main",
+                                "user_input_realm")), "main")
         self.frame = urwid.Frame(urwid.Text(""))
 
         self.main_view = MainViewList(self.frame)
