@@ -52,6 +52,12 @@ def remove_current_item(func):
 
     return _remove_current_item
 
+def update_realm(func):
+    def _update_realm(*args):
+        func(*args)
+        louie.send("update_realm")
+    return _update_realm
+
 def update_main(func):
     def _update_main(*args):
         func(*args)
@@ -551,23 +557,23 @@ class RealmList(object):
             self.frame.get_body().set_focus(self.position)
             louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
+    @update_realm
     def move_down_realm(self):
         if self.position < (len(holygrail.Grail().list_realms(all_realms=True)) - 1):
             realm = self.frame.get_body().get_focus()[0].original_widget.realm
             realm.change_position(realm.position + 1)
             self.position += 1
-            louie.send("update_realm")
 
+    @update_realm
     def move_up_realm(self):
         if self.position > 0:
             realm = self.frame.get_body().get_focus()[0].original_widget.realm
             realm.change_position(realm.position - 1)
             self.position -= 1
-            louie.send("update_realm")
 
+    @update_realm
     def toggle_realm_hide(self):
         self.frame.get_body().get_focus()[0].original_widget.activate()
-        louie.send("update_realm")
 
     def exit(self):
         raise urwid.ExitMainLoop()
@@ -580,9 +586,9 @@ class RealmList(object):
 
     @disconnect
     @have_input
+    @update_realm
     def get_rename_realm(self):
         self.frame.get_body().get_focus()[0].original_widget.realm.rename(self.user_input.strip())
-        louie.send("update_realm")
 
     def get_user_input_realm(self):
         self.frame.set_focus('body')
@@ -602,11 +608,12 @@ class RealmList(object):
 
     @disconnect
     @have_input
+    @update_realm
     def get_new_realm(self):
         self.position += 1
         holygrail.Grail().add_realm(self.user_input)
-        louie.send("update_realm")
 
+    @update_realm
     def remove_realm(self):
         realm = self.frame.get_body().get_focus()[0].original_widget.realm
         if realm.default_realm:
@@ -625,7 +632,6 @@ class RealmList(object):
             self.frame.get_body().set_focus(self.position)
         else:
             self.position -= 1
-        louie.send("update_realm")
 
 class Window(object):
 
