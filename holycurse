@@ -588,7 +588,7 @@ class RealmList(object):
             realm.change_position(realm.position - 1)
             self.position -= 1
 
-    @update_realm
+    @update_current_item
     def toggle_realm_hide(self):
         self.frame.get_body().get_focus()[0].original_widget.activate()
 
@@ -603,7 +603,7 @@ class RealmList(object):
 
     @disconnect
     @have_input
-    @update_realm
+    @update_current_item
     def get_rename_realm(self):
         self.frame.get_body().get_focus()[0].original_widget.realm.rename(self.user_input.strip())
 
