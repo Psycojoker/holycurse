@@ -7,6 +7,12 @@ import holygrail
 
 from datetime import datetime, timedelta, date
 
+def cant_be_call_on_empty_mainview(func):
+    def _cant_be_call_on_empty_mainview(*args):
+        if len(args[0].content) > 1:
+            func(*args)
+    return _cant_be_call_on_empty_mainview
+
 def remove_current_item(func):
     def _remove_current_item(*args):
         self = args[0]
@@ -243,6 +249,7 @@ class MainViewList(object):
         self.update_main_view()
         return self.content
 
+    @cant_be_call_on_empty_mainview
     def go_down(self):
         self.frame.get_body().set_focus(self.position + 1)
         louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
@@ -250,6 +257,7 @@ class MainViewList(object):
             self.frame.get_body().set_focus(self.position + 3)
             louie.send("show key", None, "Gotcha !")
 
+    @cant_be_call_on_empty_mainview
     def go_up(self):
         if self.position > 1:
             self.frame.get_body().set_focus(self.position - 1)
@@ -263,16 +271,19 @@ class MainViewList(object):
         self.frame.get_footer().get_focus().insert_text(":")
         louie.send("set state", None, "command")
 
+    @cant_be_call_on_empty_mainview
     @remove_current_item
     def tickle_one_day(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(days=1))
 
+    @cant_be_call_on_empty_mainview
     @remove_current_item
     def tickle_3_hours(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(hours=3))
 
+    @cant_be_call_on_empty_mainview
     @update_main
     def due_today(self, days=1):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
@@ -284,17 +295,20 @@ class MainViewList(object):
     def due_this_week(self):
         self.due_today(8)
 
+    @cant_be_call_on_empty_mainview
     @update_main
     def no_due(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self.frame.get_body().get_focus()[0].original_widget.mission.due_for(None)
 
+    @cant_be_call_on_empty_mainview
     @update_main
     def toggle_n_recreate(self):
         mission = self.frame.get_body().get_focus()[0].original_widget
         mission.activate()
         holygrail.Grail().add_mission(mission.mission.description, quest=mission.get_quest(), realm=mission.get_realm())
 
+    @cant_be_call_on_empty_mainview
     @remove_current_item
     def remove_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.mission.remove()
@@ -304,6 +318,7 @@ class MainViewList(object):
         else:
             self.position -= 1
 
+    @cant_be_call_on_empty_mainview
     @update_main
     def toggle_mission(self):
         mission = self.frame.get_body().get_focus()[0].original_widget.mission
@@ -327,6 +342,7 @@ class MainViewList(object):
             new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
         old_mission.toggle()
 
+    @cant_be_call_on_empty_mainview
     def add_mission_to_current_realm(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
@@ -388,6 +404,7 @@ class MainViewList(object):
         new_mission = holygrail.Grail().add_mission(self.user_input)
         new_mission.toggle()
 
+    @cant_be_call_on_empty_mainview
     def add_quest_to_current_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Quest description: ")
@@ -405,6 +422,7 @@ class MainViewList(object):
         else:
             self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(is_quest[0].id)
 
+    @cant_be_call_on_empty_mainview
     def swap_mission_to_quest(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("Mission description: ")
@@ -424,6 +442,7 @@ class MainViewList(object):
             old_mission.change_quest(is_quest[0].id)
         old_mission.rename(self.user_input)
 
+    @cant_be_call_on_empty_mainview
     def rename_mission(self):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption("New mission description: ")
