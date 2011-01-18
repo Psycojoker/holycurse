@@ -357,6 +357,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
+    @update_main
     def get_quest_to_current_mission(self):
         is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.strip())
         if not is_quest:
@@ -364,7 +365,6 @@ class MainViewList(object):
             self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(new_quest.id)
         else:
             self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(is_quest[0].id)
-        louie.send("update_main")
 
     def swap_mission_to_quest(self):
         self.frame.set_focus('footer')
@@ -374,6 +374,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
+    @update_main
     def get_swap_mission_to_quest(self):
         old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
         is_quest = holygrail.Grail().get_quest_by_desc(old_mission.description)
@@ -383,7 +384,6 @@ class MainViewList(object):
         else:
             old_mission.change_quest(is_quest[0].id)
         old_mission.rename(self.user_input)
-        louie.send("update_main")
 
     def rename_mission(self):
         self.frame.set_focus('footer')
@@ -393,9 +393,9 @@ class MainViewList(object):
 
     @disconnect
     @have_input
+    @update_main
     def get_rename_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.mission.rename(self.user_input.strip())
-        louie.send("update_main")
 
     def exit(self):
         raise urwid.ExitMainLoop()
