@@ -633,11 +633,11 @@ class Window(object):
         self.state = State(set(("main", "command", "realm", "user_input",
                                 "chose_realm", "user_input_main",
                                 "user_input_realm")), "main")
+
         self.frame = urwid.Frame(urwid.Text(""))
 
         self.main_view = MainViewList(self.frame)
         self.main_view.get_main_view()
-
         self.realm_view = RealmList(self.frame)
         self.choose_realm = ChooseRealmList(self.frame, self.main_view)
 
@@ -655,7 +655,9 @@ class Window(object):
                    ('date late', 'yellow', 'dark magenta'),
                    ('mission', 'light gray', '')]
 
-        self.loop = urwid.MainLoop(self.frame, palette, input_filter=self.show_all_input, unhandled_input=self.manage_input)
+        self.loop = urwid.MainLoop(self.frame, palette,
+                                   input_filter=self.show_all_input,
+                                   unhandled_input=self.manage_input)
         self.init_signals()
 
     def get_state(self):
