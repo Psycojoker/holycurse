@@ -467,22 +467,22 @@ class ChooseRealmList(object):
 
     def init_signals(self):
         louie.connect(self.chose_realm,                    "C_main")
-        louie.connect(self.go_up_chose_realm,              "k_chose_realm")
-        louie.connect(self.go_down_chose_realm,            "j_chose_realm")
+        louie.connect(self.go_up,                          "k_chose_realm")
+        louie.connect(self.go_down,                        "j_chose_realm")
         louie.connect(self.return_to_main_view,            "q_chose_realm")
         louie.connect(self.select_realm,                   "enter_chose_realm")
 
     def return_to_main_view(self):
         louie.send("update_main")
 
-    def go_down_chose_realm(self):
+    def go_down(self):
         # really unoptimised if
         if self.position < (len(holygrail.Grail().list_realms(all_realms=True)) - 1):
             self.frame.get_body().set_focus(self.position + 1)
             self.position += 1
             louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
-    def go_up_chose_realm(self):
+    def go_up(self):
         if self.position > 0:
             self.frame.get_body().set_focus(self.position - 1)
             self.position -= 1
