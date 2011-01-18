@@ -535,10 +535,10 @@ class RealmList(object):
         louie.connect(self.get_rename_realm, "user_input_done")
 
     @disconnect
+    @have_input
     def get_rename_realm(self):
-        if self.user_input.strip():
-            self.frame.get_body().get_focus()[0].original_widget.realm.rename(self.user_input.strip())
-            louie.send("update_realm")
+        self.frame.get_body().get_focus()[0].original_widget.realm.rename(self.user_input.strip())
+        louie.send("update_realm")
 
     def get_user_input_realm(self):
         self.frame.set_focus('body')
