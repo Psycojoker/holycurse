@@ -152,16 +152,23 @@ class RealmWidget(SeparationWidget):
     def __init__(self, realm, detailled=False):
         if not isinstance(realm, holygrail._Realm):
             raise ValueError("Realm widget need a holygrail._Realm object")
-        text = [('realm', realm.description.upper())]
-        if detailled:
-            if realm.default_realm:
-                text.append(( "quest", " [default]"))
-            text.append(" (%i)" % len(realm.get_missions()))
-        if realm.hide:
+        self.realm = realm
+        self.detailled = detailled
+        urwid.Text.__init__(self, self.display(), wrap="clip")
+
+    def display(self):
+        text = [('realm', self.realm.description.upper())]
+        if self.detailled:
+            if self.realm.default_realm:
+                text.append(("quest", " [default]"))
+            text.append(" (%i)" % len(self.realm.get_missions()))
+        if self.realm.hide:
             text.append(" - ")
             text.append(("date left", "HIDE"))
-        urwid.Text.__init__(self, text, wrap="clip")
-        self.realm = realm
+        return text
+
+    def update(self):
+        self.set_text(self.display())
 
     def activate(self):
         self.realm.toggle_hide()
