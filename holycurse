@@ -543,11 +543,11 @@ class RealmList(object):
     def get_user_input_realm(self):
         self.frame.set_focus('body')
         # debug
-        louie.send("show key", None, "Mission description: " + self.frame.get_footer().get_focus().edit_text)
+        louie.send("show key", None, "Realm description: " + self.frame.get_footer().get_focus().edit_text)
         self.user_input = self.frame.get_footer().get_focus().edit_text
         self.frame.get_footer().get_focus().edit_text = ""
         self.frame.get_footer().get_focus().set_caption("")
-        louie.send("set state", None, "main")
+        louie.send("set state", None, "realm")
         louie.send("user_input_done")
 
     def add_new_realm(self):
