@@ -477,7 +477,7 @@ class ChooseRealmList(object):
 
     def go_down_chose_realm(self):
         # really unoptimised if
-        if self.position < len(holygrail.Grail().list_realms(all_realms=True)):
+        if self.position < (len(holygrail.Grail().list_realms(all_realms=True)) - 1):
             self.frame.get_body().set_focus(self.position + 1)
             self.position += 1
             louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
