@@ -642,9 +642,8 @@ class Window(object):
         self.choose_realm = ChooseRealmList(self.frame, self.main_view)
 
         self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
-        self.top = urwid.AttrMap(self.show_key, 'header')
         self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', "I am before command line")), "header"), urwid.Edit("", "")])
-        self.frame.set_header(self.top)
+        self.frame.set_header(urwid.AttrMap(self.show_key, 'header'))
         self.frame.set_footer(self.footer)
 
         palette = [('header', 'white', 'dark red'),
