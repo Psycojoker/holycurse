@@ -459,11 +459,11 @@ class MainViewList(object):
         raise urwid.ExitMainLoop()
 
 class ChooseRealmList(object):
-    def __init__(self, frame, listbox):
+    def __init__(self, frame, main_view):
         self.position = 0
         self.frame = frame
         self.user_input = ""
-        self.listbox = listbox
+        self.main_view = main_view
 
     def init_signals(self):
         louie.connect(self.chose_realm,                    "C_main")
@@ -490,8 +490,9 @@ class ChooseRealmList(object):
 
     @update_main
     def select_realm(self):
-        if isinstance(self.listbox.get_focus()[0].original_widget, MissionWidget):
-            self.listbox.get_focus()[0].original_widget.mission.change_realm(self.frame.get_body().get_focus()[0].original_widget.realm.id)
+        if isinstance(self.main_view.listbox.get_focus()[0].original_widget, MissionWidget):
+            D(self.main_view.listbox.get_focus()[0].original_widget.mission)
+            self.main_view.listbox.get_focus()[0].original_widget.mission.change_realm(self.frame.get_body().get_focus()[0].original_widget.realm.id)
 
     def chose_realm(self):
         realm_list = [RealmWidget(c) for c in holygrail.Grail().list_realms(all_realms=True)]
@@ -636,7 +637,7 @@ class Window(object):
         self.listbox = urwid.ListBox(self.main_view.get_main_view())
 
         self.realm_view = RealmList(self.frame)
-        self.choose_realm = ChooseRealmList(self.frame, self.listbox)
+        self.choose_realm = ChooseRealmList(self.frame, self.main_view)
 
         self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
         self.top = urwid.AttrMap(self.show_key, 'header')
