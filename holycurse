@@ -450,7 +450,7 @@ class RealmList(object):
             louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     def move_down_realm(self):
-        if self.position < len(holygrail.Grail().list_realms(all_realms=True)):
+        if self.position < (len(holygrail.Grail().list_realms(all_realms=True)) - 1):
             realm = self.frame.get_body().get_focus()[0].original_widget.realm
             realm.change_position(realm.position + 1)
             self.position += 1
