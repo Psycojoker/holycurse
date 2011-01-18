@@ -407,6 +407,8 @@ class RealmList(object):
         self.user_input = ""
 
     def init_signals(self):
+        louie.connect(self.update_realm_view,              "update_realm")
+
         louie.connect(self.go_up,                          "k_realm")
         louie.connect(self.go_down,                        "j_realm")
         louie.connect(self.move_up_realm,                  "K_realm")
@@ -419,6 +421,20 @@ class RealmList(object):
         louie.connect(self.remove_realm,                   "d_realm")
 
         louie.connect(self.get_user_input_realm,           "enter_user_input_realm")
+
+    def update_realm_view(self):
+        self.content = self.fill_realm_view()
+        self.listbox = urwid.ListBox(self.content)
+        self.frame.set_body(self.listbox)
+        self.content.set_focus(self.position)
+        louie.send("set state", None, "realm")
+
+    def fill_realm_view(self):
+        context_view = [RealmWidget(i, detailled=True) for i in holygrail.Grail().list_realms(all_realms=True)]
+        if context_view:
+            return urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
+        else:
+            return urwid.SimpleListWalker([urwid.Text("Error, you don't have any realm, something really wrong has happended")])
 
     def go_down(self):
         # really unoptimised if
@@ -555,8 +571,6 @@ class Window(object):
 
         louie.connect(self.show_key.set_text,              "show key")
 
-        louie.connect(self.update_realm_view,              "update_realm")
-
         louie.connect(self.get_command,                    "enter_command")
 
         louie.connect(self.get_user_input,                 "enter_user_input")
@@ -583,20 +597,6 @@ class Window(object):
     def return_to_main_view(self):
         self.frame.set_body(self.listbox)
         louie.send("set state", None, "main")
-
-    def update_realm_view(self):
-        self.content = self.fill_realm_view()
-        self.listbox = urwid.ListBox(self.content)
-        self.frame.set_body(self.listbox)
-        self.content.set_focus(self.position_chose_realm)
-        louie.send("set state", None, "realm")
-
-    def fill_realm_view(self):
-        context_view = [RealmWidget(i, detailled=True) for i in holygrail.Grail().list_realms(all_realms=True)]
-        if context_view:
-            return urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
-        else:
-            return urwid.SimpleListWalker([urwid.Text("Error, you don't have any realm, something really wrong has happended")])
 
     def show_all_input(self, input, raw):
         return input
