@@ -382,12 +382,10 @@ class MainViewList(object):
         current_todo_due_date = self.frame.get_body().get_focus()[0].original_widget.mission.due
         due_date = None
         if current_todo_due_date:
-            if current_todo_due_date < datetime.now() + timedelta(1):
-                due_date = datetime.now() + timedelta(1)
-            elif current_todo_due_date < datetime.now() + timedelta(4):
-                due_date = datetime.now() + timedelta(4)
-            elif current_todo_due_date < datetime.now() + timedelta(8):
-                due_date = datetime.now() + timedelta(8)
+            for i in (1, 4, 8):
+                if current_todo_due_date < datetime.now() + timedelta(i):
+                    due_date = datetime.now() + timedelta(i)
+                    break
 
         holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
 
