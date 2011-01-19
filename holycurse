@@ -497,6 +497,7 @@ class ChooseRealmList(object):
 
     def chose_realm(self):
         realm_list = [RealmWidget(c) for c in holygrail.Grail().list_realms(all_realms=True)]
+        self.content = realm_list
         realm_list = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in realm_list])
         listbox = urwid.ListBox(realm_list)
         listbox.set_focus(self.position)
