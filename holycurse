@@ -523,7 +523,6 @@ class ChooseRealmList(object):
     @update_main
     def select_realm(self):
         if isinstance(self.main_view.listbox.get_focus()[0].original_widget, MissionWidget):
-            D(self.main_view.listbox.get_focus()[0].original_widget.mission)
             self.main_view.listbox.get_focus()[0].original_widget.mission.change_realm(self.frame.get_body().get_focus()[0].original_widget.realm.id)
 
 class RealmList(object):
