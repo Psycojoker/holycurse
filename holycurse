@@ -495,6 +495,14 @@ class ChooseRealmList(object):
         louie.connect(self.return_to_main_view,            "q_chose_realm")
         louie.connect(self.select_realm,                   "enter_chose_realm")
 
+    def chose_realm(self):
+        realm_list = [RealmWidget(c) for c in holygrail.Grail().list_realms(all_realms=True)]
+        realm_list = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in realm_list])
+        listbox = urwid.ListBox(realm_list)
+        listbox.set_focus(self.position)
+        self.frame.set_body(listbox)
+        louie.send("set state", None, "chose_realm")
+
     def return_to_main_view(self):
         louie.send("update_main")
 
@@ -516,14 +524,6 @@ class ChooseRealmList(object):
         if isinstance(self.main_view.listbox.get_focus()[0].original_widget, MissionWidget):
             D(self.main_view.listbox.get_focus()[0].original_widget.mission)
             self.main_view.listbox.get_focus()[0].original_widget.mission.change_realm(self.frame.get_body().get_focus()[0].original_widget.realm.id)
-
-    def chose_realm(self):
-        realm_list = [RealmWidget(c) for c in holygrail.Grail().list_realms(all_realms=True)]
-        realm_list = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in realm_list])
-        listbox = urwid.ListBox(realm_list)
-        listbox.set_focus(self.position)
-        self.frame.set_body(listbox)
-        louie.send("set state", None, "chose_realm")
 
 class RealmList(object):
     def __init__(self, frame):
