@@ -385,6 +385,7 @@ class MainViewList(object):
             for i in (1, 4, 8):
                 if current_todo_due_date < datetime.now() + timedelta(i):
                     due_date = datetime.now() + timedelta(i)
+                    new_mission_realm = None
                     break
 
         holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
