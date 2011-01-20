@@ -25,7 +25,7 @@ def remove_current_item(func):
     def _remove_current_item(*args):
         self = args[0]
         save_position = self.position
-        item = func(*args)
+        func(*args)
         self.content.pop(save_position)
 
         # only one existing todo
