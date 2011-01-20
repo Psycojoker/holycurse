@@ -532,6 +532,7 @@ class RealmList(object):
     def init_signals(self):
         louie.connect(self.update_realm_view,              "update_realm")
 
+        self.update_main_view = lambda : louie.send("update_main")
         louie.connect(self.update_main_view,               "1_realm")
         louie.connect(self.go_up,                          "k_realm")
         louie.connect(self.go_down,                        "j_realm")
