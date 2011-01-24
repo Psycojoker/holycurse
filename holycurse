@@ -9,7 +9,8 @@ from datetime import datetime, timedelta, date
 
 def cant_be_call_on_empty_mainview(func):
     def _cant_be_call_on_empty_mainview(*args):
-        if len(args[0].content) > 1:
+        self = args[0]
+        if len(self.content) > 1:
             func(*args)
     return _cant_be_call_on_empty_mainview
 
