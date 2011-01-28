@@ -298,7 +298,6 @@ class MainViewList(object):
             self.position = saved_position if saved_position < len(self.content) else len(self.content) - 1
             self.frame.get_body().set_focus(self.position)
 
-
     def get_main_view(self):
         self.update_main_view()
         return self.content
