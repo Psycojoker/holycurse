@@ -7,6 +7,48 @@ import holygrail
 
 from datetime import datetime, timedelta, date
 
+# debugging
+#from pudb import set_trace; set_trace()
+
+def D(text): open("DEBUG", "a").write("%s\n" % text)
+
+def add_to_completed_task(func):
+    def _add_to_completed_task(*args):
+        self = args[0]
+        task = func(*args)
+
+        # if empty list
+        if isinstance(self.content[-1], urwid.Text):
+            self.content.pop()
+            self.content.append(urwid.AttrMap(SeparationWidget("LAST COMPLETED MISSIONS"), None, 'reveal focus'))
+            self.content.append(urwid.AttrMap(MissionWidget(task), None, 'reveal focus'))
+            self.go_down()
+
+        # if last completed missions already exist
+        elif isinstance(self.content[-1].original_widget, MissionWidget) and\
+           self.content[-1].original_widget.mission.completed:
+            a = len(self.content) - 1
+            while not isinstance(self.content[a].original_widget, SeparationWidget):
+                a -= 1
+            self.content.insert(a + 1, urwid.AttrMap(MissionWidget(task), None, 'reveal focus'))
+
+        # if last completed missions doesn't exist
+        else:
+            self.content.append(urwid.AttrMap(urwid.Divider(" "), None, 'reveal focus'))
+            self.content.append(urwid.AttrMap(SeparationWidget("LAST COMPLETED MISSIONS"), None, 'reveal focus'))
+            self.content.append(urwid.AttrMap(MissionWidget(task), None, 'reveal focus'))
+
+        # if < 5 last completed missions, remove the last one
+        completed_missions, it = 0, len(self.content) -1
+        while not isinstance(self.content[it].original_widget, SeparationWidget):
+            it -= 1
+            completed_missions += 1
+
+        if completed_missions > 5:
+            self.content.pop()
+
+    return _add_to_completed_task
+
 def cant_be_call_on_empty_mainview(func):
     def _cant_be_call_on_empty_mainview(*args):
         self = args[0]
