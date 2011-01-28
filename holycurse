@@ -424,10 +424,7 @@ class MainViewList(object):
             louie.send("update_main")
 
     def add_new_mission_to_quest(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Next mission description: ")
-        louie.send("set state", None, "user_input_main")
-        louie.connect(self.get_next_mission_to_quest, "user_input_done")
+        self._wait_for_input("Next mission description: ", self.get_next_mission_to_quest)
 
     @disconnect
     @update_main
@@ -439,10 +436,7 @@ class MainViewList(object):
 
     @cant_be_call_on_empty_mainview
     def add_mission_to_current_realm(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input_main")
-        louie.connect(self.get_current_realm_mission, "user_input_done")
+        self._wait_for_input("Mission description: ", self.get_current_realm_mission)
 
     @disconnect
     @have_input
@@ -473,10 +467,7 @@ class MainViewList(object):
         louie.send("user_input_done")
 
     def add_mission_to_default_realm(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input_main")
-        louie.connect(self.get_default_realm_mission, "user_input_done")
+        self._wait_for_input("Mission description: ", self.get_default_realm_mission)
 
     @disconnect
     @have_input
@@ -486,11 +477,7 @@ class MainViewList(object):
         holygrail.Grail().add_mission(self.user_input)
 
     def add_completed_mission(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input_main")
-        # this is the receiver
-        louie.connect(self.get_completed_mission, "user_input_done")
+        self._wait_for_input("Mission description: ", self.get_completed_mission)
 
     @disconnect
     @have_input
@@ -502,10 +489,7 @@ class MainViewList(object):
 
     @cant_be_call_on_empty_mainview
     def add_quest_to_current_mission(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Quest description: ")
-        louie.send("set state", None, "user_input_main")
-        louie.connect(self.get_quest_to_current_mission, "user_input_done")
+        self._wait_for_input("Quest description: ", self.get_quest_to_current_mission)
 
     @disconnect
     @have_input
@@ -520,10 +504,7 @@ class MainViewList(object):
 
     @cant_be_call_on_empty_mainview
     def swap_mission_to_quest(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Mission description: ")
-        louie.send("set state", None, "user_input_main")
-        louie.connect(self.get_swap_mission_to_quest, "user_input_done")
+        self._wait_for_input("Mission description: ", self.get_swap_mission_to_quest)
 
     @disconnect
     @have_input
@@ -540,16 +521,19 @@ class MainViewList(object):
 
     @cant_be_call_on_empty_mainview
     def rename_mission(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("New mission description: ")
-        louie.send("set state", None, "user_input_main")
-        louie.connect(self.get_rename_mission, "user_input_done")
+        self._wait_for_input("New mission description: ", self.get_rename_mission)
 
     @disconnect
     @have_input
     @update_current_item
     def get_rename_mission(self):
         self.frame.get_body().get_focus()[0].original_widget.mission.rename(self.user_input.strip())
+
+    def _wait_for_input(self, text, callback):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption(text)
+        louie.send("set state", None, "user_input_main")
+        louie.connect(callback, "user_input_done")
 
     def exit(self):
         raise urwid.ExitMainLoop()
