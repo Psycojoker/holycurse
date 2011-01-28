@@ -412,11 +412,11 @@ class MainViewList(object):
             self._get_current_mission().due_for(None)
 
     @cant_be_call_on_empty_mainview
-    @update_main
+    @append_mission_to_current_group
     def toggle_n_recreate(self):
         mission = self._get_current_mission()
-        mission.toggle()
-        holygrail.Grail().add_mission(mission.description, quest=mission.quest, realm=mission.realm)
+        self._toggle_mission()
+        return holygrail.Grail().add_mission(mission.description, quest=mission.quest, realm=mission.realm)
 
     @cant_be_call_on_empty_mainview
     @remove_current_item
