@@ -497,7 +497,6 @@ class MainViewList(object):
     @have_input
     @update_main
     def get_default_realm_mission(self):
-        self.position += 1
         holygrail.Grail().add_mission(self.user_input)
 
     def add_completed_mission(self):
