@@ -494,9 +494,11 @@ class MainViewList(object):
 
     @disconnect
     @have_input
+    @add_to_completed_task
     def get_completed_mission(self):
         new_mission = holygrail.Grail().add_mission(self.user_input)
         new_mission.toggle()
+        return new_mission
 
     @cant_be_call_on_empty_mainview
     def add_quest_to_current_mission(self):
