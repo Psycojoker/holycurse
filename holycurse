@@ -370,13 +370,13 @@ class MainViewList(object):
     @remove_current_item
     def tickle_one_day(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(days=1))
+            self._get_current_mission().tickle(datetime.now() + timedelta(days=1))
 
     @cant_be_call_on_empty_mainview
     @remove_current_item
     def tickle_3_hours(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.mission.tickle(datetime.now() + timedelta(hours=3))
+            self._get_current_mission().tickle(datetime.now() + timedelta(hours=3))
 
     @cant_be_call_on_empty_mainview
     @update_main
@@ -394,7 +394,7 @@ class MainViewList(object):
     @update_main
     def no_due(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.mission.due_for(None)
+            self._get_current_mission().due_for(None)
 
     @cant_be_call_on_empty_mainview
     @update_main
@@ -406,7 +406,7 @@ class MainViewList(object):
     @cant_be_call_on_empty_mainview
     @remove_current_item
     def remove_mission(self):
-        self.frame.get_body().get_focus()[0].original_widget.mission.remove()
+        self._get_current_mission().remove()
         self.frame.get_body().set_focus(self.position - 1)
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
             self.frame.get_body().set_focus(self.position)
@@ -415,7 +415,7 @@ class MainViewList(object):
 
     @cant_be_call_on_empty_mainview
     def toggle_mission(self):
-        mission = self.frame.get_body().get_focus()[0].original_widget.mission
+        mission = self._get_current_mission()
 
         if not mission.completed:
             if mission.quest:
@@ -429,7 +429,7 @@ class MainViewList(object):
     @remove_current_item
     @add_to_completed_task
     def _toggle_mission(self):
-        mission = self.frame.get_body().get_focus()[0].original_widget.mission
+        mission = self._get_current_mission()
         mission.toggle()
         return mission
 
@@ -439,7 +439,7 @@ class MainViewList(object):
     @disconnect
     @update_main
     def get_next_mission_to_quest(self):
-        old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
+        old_mission = self._get_current_mission()
         if self.user_input.strip():
             new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
         self._toggle_mission()
@@ -455,7 +455,7 @@ class MainViewList(object):
         self.position += 1
         new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
 
-        current_todo_due_date = self.frame.get_body().get_focus()[0].original_widget.mission.due
+        current_todo_due_date = self._get_current_mission().due
         due_date = None
         if current_todo_due_date:
             for i in (1, 4, 8):
@@ -508,9 +508,9 @@ class MainViewList(object):
         is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.strip())
         if not is_quest:
             new_quest = holygrail.Grail().add_quest(self.user_input)
-            self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(new_quest.id)
+            self._get_current_mission().change_quest(new_quest.id)
         else:
-            self.frame.get_body().get_focus()[0].original_widget.mission.change_quest(is_quest[0].id)
+            self._get_current_mission().change_quest(is_quest[0].id)
 
     @cant_be_call_on_empty_mainview
     def swap_mission_to_quest(self):
@@ -520,7 +520,7 @@ class MainViewList(object):
     @have_input
     @update_current_item
     def get_swap_mission_to_quest(self):
-        old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
+        old_mission = self._get_current_mission()
         is_quest = holygrail.Grail().get_quest_by_desc(old_mission.description)
         if not is_quest:
             new_quest = holygrail.Grail().add_quest(old_mission.description)
@@ -537,13 +537,16 @@ class MainViewList(object):
     @have_input
     @update_current_item
     def get_rename_mission(self):
-        self.frame.get_body().get_focus()[0].original_widget.mission.rename(self.user_input.strip())
+        self._get_current_mission().rename(self.user_input.strip())
 
     def _wait_for_input(self, text, callback):
         self.frame.set_focus('footer')
         self.frame.get_footer().get_focus().set_caption(text)
         louie.send("set state", None, "user_input_main")
         louie.connect(callback, "user_input_done")
+
+    def _get_current_mission(self):
+        return self.frame.get_body().get_focus()[0].original_widget.mission
 
     def exit(self):
         raise urwid.ExitMainLoop()
