@@ -12,6 +12,21 @@ from datetime import datetime, timedelta, date
 
 def D(text): open("DEBUG", "a").write("%s\n" % text)
 
+def append_mission_to_current_group(func):
+    def _append_mission_to_current_group(*args):
+        mission = func(*args)
+        self = args[0]
+
+        it = self.position
+        while not isinstance(self.content[it].original_widget, urwid.Divider) and it < len(self.content) - 1:
+            it += 1
+        if it == len(self.content) - 1:
+            it += 1
+
+        self.content.insert(it, urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
+
+    return _append_mission_to_current_group
+
 def add_to_completed_task(func):
     def _add_to_completed_task(*args):
         self = args[0]
