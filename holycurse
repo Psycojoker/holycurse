@@ -656,10 +656,7 @@ class RealmList(object):
         raise urwid.ExitMainLoop()
 
     def rename_realm(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("New realm description: ")
-        louie.send("set state", None, "user_input_realm")
-        louie.connect(self.get_rename_realm, "user_input_done")
+        self._wait_for_input("New realm description: ", self.get_rename_realm)
 
     @disconnect
     @have_input
@@ -678,10 +675,7 @@ class RealmList(object):
         louie.send("user_input_done")
 
     def add_new_realm(self):
-        self.frame.set_focus('footer')
-        self.frame.get_footer().get_focus().set_caption("Realm description: ")
-        louie.send("set state", None, "user_input_realm")
-        louie.connect(self.get_new_realm, "user_input_done")
+        self._wait_for_input("Realm description: ", self.get_new_realm)
 
     @disconnect
     @have_input
@@ -709,6 +703,12 @@ class RealmList(object):
             self.frame.get_body().set_focus(self.position)
         else:
             self.position -= 1
+
+    def _wait_for_input(self, text, callback):
+        self.frame.set_focus('footer')
+        self.frame.get_footer().get_focus().set_caption(text)
+        louie.send("set state", None, "user_input_realm")
+        louie.connect(callback, "user_input_done")
 
 class Window(object):
 
