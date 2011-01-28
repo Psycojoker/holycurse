@@ -465,7 +465,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @update_main
+    @append_mission_to_current_group
     def get_current_realm_mission(self):
         self.position += 1
         new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
@@ -479,7 +479,7 @@ class MainViewList(object):
                     new_mission_realm = None
                     break
 
-        holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
+        return holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
 
     def get_user_input_main_view(self):
         self.frame.set_focus('body')
