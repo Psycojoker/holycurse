@@ -343,13 +343,13 @@ class MainViewList(object):
             self.position -= 1
 
     @cant_be_call_on_empty_mainview
-    @update_main
     def toggle_mission(self):
         mission = self.frame.get_body().get_focus()[0].original_widget.mission
 
         if not mission.completed and mission.quest:
             self.add_new_mission_to_quest()
         else:
+            louie.send("update_main")
             mission.toggle()
 
     def add_new_mission_to_quest(self):
@@ -359,8 +359,8 @@ class MainViewList(object):
         louie.connect(self.get_next_mission_to_quest, "user_input_done")
 
     @disconnect
+    @update_main
     def get_next_mission_to_quest(self):
-        # I got what I want, disconnect
         old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
         if self.user_input.strip():
             new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
