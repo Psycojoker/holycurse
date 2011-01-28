@@ -442,7 +442,7 @@ class MainViewList(object):
         old_mission = self.frame.get_body().get_focus()[0].original_widget.mission
         if self.user_input.strip():
             new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
-        old_mission.toggle()
+        self._toggle_mission()
 
     @cant_be_call_on_empty_mainview
     def add_mission_to_current_realm(self):
