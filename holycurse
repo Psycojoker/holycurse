@@ -468,7 +468,7 @@ class MainViewList(object):
     @append_mission_to_current_group
     def get_current_realm_mission(self):
         self.position += 1
-        new_mission_realm = self.frame.get_body().get_focus()[0].original_widget.get_realm()
+        new_mission_realm = self._get_current_mission().realm
 
         current_todo_due_date = self._get_current_mission().due
         due_date = None
