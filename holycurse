@@ -12,6 +12,12 @@ from datetime import datetime, timedelta, date
 
 def D(text): open("DEBUG", "a").write("%s\n" % text)
 
+def toggle_current_mission(func):
+    def _toggle_current_mission(*args):
+        func(*args)
+        args[0]._toggle_mission()
+    return _toggle_current_mission
+
 def append_mission_to_current_group(func):
     def _append_mission_to_current_group(*args):
         mission = func(*args)
@@ -452,12 +458,12 @@ class MainViewList(object):
         self._wait_for_input("Next mission description: ", self.get_next_mission_to_quest)
 
     @disconnect
-    @update_main
+    @toggle_current_mission
+    @have_input
+    @append_mission_to_current_group
     def get_next_mission_to_quest(self):
         old_mission = self._get_current_mission()
-        if self.user_input.strip():
-            new_mission = holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
-        self._toggle_mission()
+        return holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
 
     @cant_be_call_on_empty_mainview
     def add_mission_to_current_realm(self):
