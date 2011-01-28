@@ -402,8 +402,7 @@ class MainViewList(object):
     @cant_be_call_on_empty_mainview
     @update_main
     def due_today(self, days=1):
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self.frame.get_body().get_focus()[0].original_widget.due_today(days)
+        self.frame.get_body().get_focus()[0].original_widget.due_today(days)
 
     def due_in_3_days(self):
         self.due_today(4)
@@ -414,8 +413,7 @@ class MainViewList(object):
     @cant_be_call_on_empty_mainview
     @update_main
     def no_due(self):
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
-            self._get_current_mission().due_for(None)
+        self._get_current_mission().due_for(None)
 
     @cant_be_call_on_empty_mainview
     @append_mission_to_current_group
