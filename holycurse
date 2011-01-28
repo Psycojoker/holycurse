@@ -414,9 +414,9 @@ class MainViewList(object):
     @cant_be_call_on_empty_mainview
     @update_main
     def toggle_n_recreate(self):
-        mission = self.frame.get_body().get_focus()[0].original_widget
-        mission.activate()
-        holygrail.Grail().add_mission(mission.mission.description, quest=mission.get_quest(), realm=mission.get_realm())
+        mission = self._get_current_mission()
+        mission.toggle()
+        holygrail.Grail().add_mission(mission.description, quest=mission.quest, realm=mission.realm)
 
     @cant_be_call_on_empty_mainview
     @remove_current_item
