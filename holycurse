@@ -32,7 +32,7 @@ def remove_current_item(func):
         # only one existing todo
         if len(self.content) == 1:
             # call usual update, the difference won't value to code some
-            #c specifique optimisations
+            # specifique optimisations
             louie.send("update_main")
 
         # at the end of the list
