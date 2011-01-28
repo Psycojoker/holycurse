@@ -378,8 +378,8 @@ class MainViewList(object):
         if not mission.completed and mission.quest:
             self.add_new_mission_to_quest()
         else:
-            louie.send("update_main")
             mission.toggle()
+            louie.send("update_main")
 
     def add_new_mission_to_quest(self):
         self.frame.set_focus('footer')
