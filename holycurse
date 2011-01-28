@@ -27,7 +27,7 @@ def remove_current_item(func):
         self = args[0]
         save_position = self.position
         func(*args)
-        self.content.pop(save_position)
+        removed = self.content.pop(save_position)
 
         # only one existing todo
         if len(self.content) == 1:
@@ -58,6 +58,9 @@ def remove_current_item(func):
             if len(self.content) == 1:
                 self.position = 1
             self.content.set_focus(self.position)
+
+        if removed.original_widget.mission.completed:
+            self.refill_last_completed_missions()
 
     return _remove_current_item
 
@@ -268,6 +271,33 @@ class MainViewList(object):
 
         to_return.set_focus(1)
         return to_return
+
+    def refill_last_completed_missions(self):
+        last_completed_missions = holygrail.Grail().last_completed_missions()
+        if last_completed_missions:
+            # if already have completed missions remove everything
+            # yes, badly optimised
+            saved_position = self.position
+            if self.content[-1].original_widget.mission.completed:
+                completed_missions, it = 0, len(self.content) -1
+                while not isinstance(self.content[it].original_widget, SeparationWidget):
+                    it -= 1
+                    completed_missions += 1
+
+                for i in xrange(completed_missions + 1):
+                    self.content.pop()
+
+            a = 0
+            self.content.append(urwid.AttrMap(SeparationWidget("LAST COMPLETED MISSIONS"), None, 'reveal focus'))
+            for i in holygrail.Grail().last_completed_missions():
+                if a > 4:
+                    break
+                a += 1
+                self.content.append(urwid.AttrMap(MissionWidget(i), None, 'reveal focus'))
+
+            self.position = saved_position if saved_position < len(self.content) else len(self.content) - 1
+            self.frame.get_body().set_focus(self.position)
+
 
     def get_main_view(self):
         self.update_main_view()
