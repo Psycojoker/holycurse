@@ -257,7 +257,7 @@ class MainViewList(object):
             a = 0
             main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
             for i in holygrail.Grail().last_completed_missions():
-                if a > 5:
+                if a > 4:
                     break
                 a += 1
                 main_view.append(MissionWidget(i))
