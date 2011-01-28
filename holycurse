@@ -417,11 +417,21 @@ class MainViewList(object):
     def toggle_mission(self):
         mission = self.frame.get_body().get_focus()[0].original_widget.mission
 
-        if not mission.completed and mission.quest:
-            self.add_new_mission_to_quest()
+        if not mission.completed:
+            if mission.quest:
+                self.add_new_mission_to_quest()
+            else:
+                self._toggle_mission()
         else:
             mission.toggle()
             louie.send("update_main")
+
+    @remove_current_item
+    @add_to_completed_task
+    def _toggle_mission(self):
+        mission = self.frame.get_body().get_focus()[0].original_widget.mission
+        mission.toggle()
+        return mission
 
     def add_new_mission_to_quest(self):
         self._wait_for_input("Next mission description: ", self.get_next_mission_to_quest)
