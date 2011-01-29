@@ -13,6 +13,41 @@ def toggle_current_mission(func):
         args[0]._toggle_mission()
     return _toggle_current_mission
 
+def place_mission(func):
+    def _place_missions(*args):
+        mission = func(*args)
+        self = args[0]
+
+        # if empty list
+        if isinstance(self.content[-1], urwid.Text):
+            self.content.pop()
+            self.content.append(urwid.AttrMap(RealmWidget(mission.realm), None, 'reveal focus'))
+            self.content.append(urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
+            self.go_down()
+
+        # find the context where I want to add this mission
+        else:
+            it = 0
+            while it < len(self.content) and\
+                  not (isinstance(self.content[it].original_widget, RealmWidget) and\
+                       self.content[it].original_widget.realm == mission.realm):
+                it += 1
+            it += 1
+
+            # if I found it, append to it end
+            if it <= len(self.content):
+                while not isinstance(self.content[it].original_widget, urwid.Divider) and it < len(self.content) - 1:
+                    it += 1
+                if it == len(self.content) - 1:
+                    it += 1
+            else:
+                D("pas trouvé")
+                louie.send("update_main")
+
+            self.content.insert(it, urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
+
+    return _place_missions
+
 def append_mission_to_current_group(func):
     def _append_mission_to_current_group(*args):
         mission = func(*args)
@@ -492,9 +527,9 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @update_main
+    @place_mission
     def get_default_realm_mission(self):
-        holygrail.Grail().add_mission(self.user_input)
+        return holygrail.Grail().add_mission(self.user_input)
 
     def add_completed_mission(self):
         self._wait_for_input("Mission description: ", self.get_completed_mission)
