@@ -200,9 +200,6 @@ class MissionWidget(urwid.Text):
 
         return display
 
-    def activate(self):
-        self.mission.toggle()
-
     def due_today(self, days):
         if days == 1:
             self.mission.due_for(datetime.today())
@@ -218,9 +215,6 @@ class MissionWidget(urwid.Text):
 class SeparationWidget(urwid.Text):
     def __init__(self, text):
         urwid.Text.__init__(self, ('realm', text.upper()), wrap="clip")
-
-    def activate(self):
-        pass
 
 class RealmWidget(SeparationWidget):
     def __init__(self, realm, detailled=False):
@@ -243,9 +237,6 @@ class RealmWidget(SeparationWidget):
 
     def update(self):
         self.set_text(self.display())
-
-    def activate(self):
-        self.realm.toggle_hide()
 
 class State(object):
     def __init__(self, states_set, state):
@@ -682,7 +673,7 @@ class RealmList(object):
 
     @update_current_item
     def toggle_realm_hide(self):
-        self.frame.get_body().get_focus()[0].original_widget.activate()
+        self.frame.get_body().get_focus()[0].original_widget.realm.toggle_hide()
 
     def exit(self):
         raise urwid.ExitMainLoop()
