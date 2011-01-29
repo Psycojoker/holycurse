@@ -118,8 +118,7 @@ def remove_current_item(func):
 
         ## have remove everything from a realm or a "for in x time"
         if isinstance(self.content[self.position].original_widget, urwid.Divider)\
-             and isinstance(self.content[self.position - 1].original_widget, SeparationWidget)\
-             and not removed.original_widget.mission.completed:
+             and isinstance(self.content[self.position - 1].original_widget, SeparationWidget):
             # clean useless stuff
             self.content.pop(self.position)
             self.content.pop(self.position - 1)
