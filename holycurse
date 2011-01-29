@@ -7,11 +7,6 @@ import holygrail
 
 from datetime import datetime, timedelta, date
 
-# debugging
-#from pudb import set_trace; set_trace()
-
-def D(text): open("DEBUG", "a").write("%s\n" % text)
-
 def toggle_current_mission(func):
     def _toggle_current_mission(*args):
         func(*args)
