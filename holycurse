@@ -439,7 +439,6 @@ class MainViewList(object):
     @remove_current_item
     def remove_mission(self):
         self._get_current_mission().remove()
-        self.frame.get_body().set_focus(self.position - 1)
 
     @cant_be_call_on_empty_mainview
     def toggle_mission(self):
