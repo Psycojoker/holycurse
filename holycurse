@@ -92,26 +92,39 @@ def remove_current_item(func):
         func(*args)
         removed = self.content.pop(save_position)
 
+        #if isinstance(self.content[self.position].original_widget, urwid.Divider):
+            #self.go_down()
+
         # only one existing todo
         if len(self.content) == 1:
             # call usual update, the difference won't value to code some
             # specifique optimisations
             louie.send("update_main")
+            return
 
-        # at the end of the list
+        ## at the end of the list
         elif len(self.content) <= self.position:
-            # clean useless stuff
-            self.content.pop(self.position - 1)
-            self.content.pop(self.position - 2)
-            # go down if not at bottom, else go to one
-            self.position = self.position - 3 if (self.position - 3) > 0 else 1
-            # nothing in the list ? go to 0
-            if len(self.content) == 1:
-                self.position = 0
+            self.position = len(self.content) - 1
+            self.content.set_focus(self.position)
+            if isinstance(self.content[self.position].original_widget, SeparationWidget):
+                # clean useless stuff
+                self.content.pop()
+                self.content.pop()
+                ## go down if not at bottom, else go to one
+                self.position = self.position - 2 if (self.position - 2) > 0 else 1
+                ## nothing in the list ? go to 0
+                if len(self.content) == 1:
+                    self.position = 0
+                self.content.set_focus(self.position)
+
+        elif not isinstance(self.content[self.position].original_widget, urwid.Divider):
+            self.go_down()
             self.content.set_focus(self.position)
 
-        # have remove everything from a realm
-        elif isinstance(self.content[self.position].original_widget, urwid.Divider):
+        ## have remove everything from a realm or a "for in x time"
+        if isinstance(self.content[self.position].original_widget, urwid.Divider)\
+             and isinstance(self.content[self.position - 1].original_widget, SeparationWidget)\
+             and not removed.original_widget.mission.completed:
             # clean useless stuff
             self.content.pop(self.position)
             self.content.pop(self.position - 1)
@@ -427,10 +440,6 @@ class MainViewList(object):
     def remove_mission(self):
         self._get_current_mission().remove()
         self.frame.get_body().set_focus(self.position - 1)
-        if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
-            self.frame.get_body().set_focus(self.position)
-        else:
-            self.position -= 1
 
     @cant_be_call_on_empty_mainview
     def toggle_mission(self):
