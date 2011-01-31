@@ -446,7 +446,7 @@ class MainViewList(object):
         return mission
 
     def add_new_mission_to_quest(self):
-        self._wait_for_input("Next mission description: ", self.get_next_mission_to_quest)
+        self._wait_for_input("Next mission description (enter nothing to end quest): ", self.get_next_mission_to_quest)
 
     @disconnect
     @toggle_current_mission
