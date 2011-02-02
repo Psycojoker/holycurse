@@ -40,11 +40,10 @@ def place_mission(func):
                     it += 1
                 if it == len(self.content) - 1:
                     it += 1
+                self.content.insert(it, urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
             else:
-                D("pas trouvé")
                 louie.send("update_main")
 
-            self.content.insert(it, urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
 
     return _place_missions
 
