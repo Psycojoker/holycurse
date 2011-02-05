@@ -595,7 +595,7 @@ class MainViewList(object):
         return self.frame.get_body().get_focus()[0].original_widget
 
     def _get_current_mission(self):
-        return self.frame.get_body().get_focus()[0].original_widget.mission
+        return self._get_current_widget().mission
 
     def exit(self):
         raise urwid.ExitMainLoop()
