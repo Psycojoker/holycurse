@@ -591,6 +591,9 @@ class MainViewList(object):
         louie.send("set state", None, "user_input_main")
         louie.connect(callback, "user_input_done")
 
+    def _get_current_widget(self):
+        return self.frame.get_body().get_focus()[0].original_widget
+
     def _get_current_mission(self):
         return self.frame.get_body().get_focus()[0].original_widget.mission
 
