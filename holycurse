@@ -509,7 +509,7 @@ class MainViewList(object):
         self._get_current_mission().due_for(None)
 
     @cant_be_call_on_empty_mainview
-    @append_mission_to_current_group
+    @place_mission
     def toggle_n_recreate(self):
         mission = self._get_current_mission()
         self._toggle_mission()
