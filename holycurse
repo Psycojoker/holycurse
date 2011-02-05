@@ -47,6 +47,59 @@ def place_mission(func):
 
     return _place_missions
 
+def place_due_mission(func):
+    def _place_due_missions(*args):
+        mission = func(*args)
+        self = args[0]
+
+        current_todo_due_date = mission.due
+        due_date = None
+        if current_todo_due_date:
+            for i, j in ((1,  "FOR TODAY"), (4,  "FOR IN 3 DAYS"), (8,  "FOR THIS WEEK")):
+                if current_todo_due_date < datetime.now() + timedelta(i):
+                    due_date = j
+                    break
+
+        current_todo_due_date = mission.due
+        # if empty list
+        if isinstance(self.content[-1], urwid.Text):
+            self.content.pop()
+            self.content.append(urwid.AttrMap(RealmWidget(mission.realm), None, 'reveal focus'))
+            self.content.append(urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
+            self.go_down()
+
+        elif mission.completed:
+            pass
+
+        # find the context where I want to add this mission
+        else:
+            it = 0
+            while it < len(self.content) and\
+                  not (isinstance(self.content[it].original_widget, SeparationWidget) and\
+                       self.content[it].original_widget.text == due_date):
+                it += 1
+            it += 1
+
+            # if I found it, append to it end
+            if it <= len(self.content):
+                while not isinstance(self.content[it].original_widget, urwid.Divider) and it < len(self.content) - 1:
+                    it += 1
+                if it == len(self.content) - 1:
+                    it += 1
+                self.content.insert(it, urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
+            else:
+                louie.send("update_main")
+
+        current = self.frame.get_body().get_focus()[0].original_widget
+        if isinstance(current, urwid.Divider):
+            self.position -= 1
+            self.content.set_focus(self.position)
+        elif isinstance(current, SeparationWidget):
+            self.position += 1
+            self.content.set_focus(self.position)
+
+    return _place_due_missions
+
 def append_mission_to_current_group(func):
     def _append_mission_to_current_group(*args):
         mission = func(*args)
