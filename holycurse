@@ -118,7 +118,7 @@ def remove_current_item(func):
     def _remove_current_item(*args):
         self = args[0]
         save_position = self.position
-        func(*args)
+        mission = func(*args)
         removed = self.content.pop(save_position)
 
         #if isinstance(self.content[self.position].original_widget, urwid.Divider):
@@ -129,7 +129,7 @@ def remove_current_item(func):
             # call usual update, the difference won't value to code some
             # specifique optimisations
             louie.send("update_main")
-            return
+            return mission
 
         ## at the end of the list
         elif len(self.content) <= self.position:
@@ -165,6 +165,8 @@ def remove_current_item(func):
 
         if removed.original_widget.mission.completed:
             self.refill_last_completed_missions()
+
+        return mission
 
     return _remove_current_item
 
