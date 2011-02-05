@@ -216,6 +216,10 @@ def remove_current_item(func):
         if removed.original_widget.mission.completed:
             self.refill_last_completed_missions()
 
+        if len(self.content) != 1 and isinstance(self._get_current_widget(), urwid.Divider):
+            self.position -= 1
+            self.content.set_focus(self.position)
+
         return mission
 
     return _remove_current_item
