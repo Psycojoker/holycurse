@@ -289,12 +289,6 @@ class MissionWidget(urwid.Text):
 
         return display
 
-    def due_today(self, days):
-        if days == 1:
-            self.mission.due_for(datetime.today())
-        else:
-            self.mission.due_for(datetime.today() + timedelta(days))
-
     def get_realm(self):
         return self.mission.realm
 
@@ -487,9 +481,21 @@ class MainViewList(object):
             self._get_current_mission().tickle(datetime.now() + timedelta(hours=3))
 
     @cant_be_call_on_empty_mainview
-    @update_main
     def due_today(self, days=1):
-        self.frame.get_body().get_focus()[0].original_widget.due_today(days)
+        mission = self._get_current_mission()
+        mission.due_for(datetime.today() + timedelta(days))
+        if mission.completed:
+            self._due_mission_completed(mission)
+        else:
+            self._due_mission(mission)
+
+    @place_due_mission
+    @remove_current_item
+    def _due_mission(self, mission):
+        return mission
+
+    def _due_mission_completed(self, mission):
+        self._get_current_widget().update()
 
     def due_in_3_days(self):
         self.due_today(4)
