@@ -258,6 +258,7 @@ class MainViewList(object):
     def __init__(self, frame):
         self.position = 0
         self.frame = frame
+        self.grail = holygrail.Grail()
 
     def init_signals(self):
         louie.connect(self.update_main_view,               "update_main")
@@ -302,13 +303,13 @@ class MainViewList(object):
         louie.send("set state", None, "main")
 
     def fill_main_view(self):
-        super_main_view = holygrail.Grail().super_main_view()
-        last_completed_missions = holygrail.Grail().last_completed_missions()
+        super_main_view = self.grail.super_main_view()
+        last_completed_missions = self.grail.last_completed_missions()
         if not super_main_view and not last_completed_missions:
             return urwid.SimpleListWalker([urwid.Text("You don't have any mission, press 'n' to create a new one")])
         main_view = []
         for i in super_main_view:
-            if isinstance(i[0], str):
+            if type(i[0]) is str:
                 main_view.append(SeparationWidget(i[0]))
             else:
                 main_view.append(RealmWidget(i[0]))
@@ -318,7 +319,6 @@ class MainViewList(object):
             main_view.append(urwid.Divider(" "))
 
         if last_completed_missions:
-            a = 0
             main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
             for i in last_completed_missions:
                 if a > 4:
@@ -334,7 +334,7 @@ class MainViewList(object):
         return to_return
 
     def refill_last_completed_missions(self):
-        last_completed_missions = holygrail.Grail().last_completed_missions()
+        last_completed_missions = self.grail.last_completed_missions()
         if last_completed_missions:
             # if already have completed missions remove everything
             # yes, badly optimised
@@ -350,7 +350,7 @@ class MainViewList(object):
 
             a = 0
             self.content.append(urwid.AttrMap(SeparationWidget("LAST COMPLETED MISSIONS"), None, 'reveal focus'))
-            for i in holygrail.Grail().last_completed_missions():
+            for i in self.grail.last_completed_missions():
                 if a > 4:
                     break
                 a += 1
@@ -418,7 +418,7 @@ class MainViewList(object):
     def toggle_n_recreate(self):
         mission = self._get_current_mission()
         self._toggle_mission()
-        return holygrail.Grail().add_mission(mission.description, quest=mission.quest, realm=mission.realm)
+        return self.grail.add_mission(mission.description, quest=mission.quest, realm=mission.realm)
 
     @cant_be_call_on_empty_mainview
     @remove_current_item
@@ -454,7 +454,7 @@ class MainViewList(object):
     @append_mission_to_current_group
     def get_next_mission_to_quest(self):
         old_mission = self._get_current_mission()
-        return holygrail.Grail().add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
+        return self.grail.add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
 
     @cant_be_call_on_empty_mainview
     def add_mission_to_current_realm(self):
@@ -475,7 +475,7 @@ class MainViewList(object):
                     new_mission_realm = None
                     break
 
-        return holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date)
+        return self.grail.add_mission(self.user_input, realm=new_mission_realm, due=due_date)
 
     def get_user_input_main_view(self):
         self.frame.set_focus('body')
@@ -494,7 +494,7 @@ class MainViewList(object):
     @have_input
     @update_main
     def get_default_realm_mission(self):
-        holygrail.Grail().add_mission(self.user_input)
+        self.grail.add_mission(self.user_input)
 
     def add_completed_mission(self):
         self._wait_for_input("Mission description: ", self.get_completed_mission)
@@ -503,7 +503,7 @@ class MainViewList(object):
     @have_input
     @add_to_completed_task
     def get_completed_mission(self):
-        new_mission = holygrail.Grail().add_mission(self.user_input)
+        new_mission = self.grail.add_mission(self.user_input)
         new_mission.toggle()
         return new_mission
 
@@ -515,9 +515,9 @@ class MainViewList(object):
     @have_input
     @update_current_item
     def get_quest_to_current_mission(self):
-        is_quest = holygrail.Grail().get_quest_by_desc(self.user_input.strip())
+        is_quest = self.grail.get_quest_by_desc(self.user_input.strip())
         if not is_quest:
-            new_quest = holygrail.Grail().add_quest(self.user_input)
+            new_quest = self.grail.add_quest(self.user_input)
             self._get_current_mission().change_quest(new_quest.id)
         else:
             self._get_current_mission().change_quest(is_quest[0].id)
@@ -531,9 +531,9 @@ class MainViewList(object):
     @update_current_item
     def get_swap_mission_to_quest(self):
         old_mission = self._get_current_mission()
-        is_quest = holygrail.Grail().get_quest_by_desc(old_mission.description)
+        is_quest = self.grail.get_quest_by_desc(old_mission.description)
         if not is_quest:
-            new_quest = holygrail.Grail().add_quest(old_mission.description)
+            new_quest = self.grail.add_quest(old_mission.description)
             old_mission.change_quest(new_quest.id)
         else:
             old_mission.change_quest(is_quest[0].id)
@@ -567,6 +567,7 @@ class ChooseRealmList(object):
         self.frame = frame
         self.user_input = ""
         self.main_view = main_view
+        self.grail = holygrail.Grail()
 
     def init_signals(self):
         louie.connect(self.chose_realm,                    "C_main")
@@ -576,7 +577,7 @@ class ChooseRealmList(object):
         louie.connect(self.select_realm,                   "enter_chose_realm")
 
     def chose_realm(self):
-        realm_list = [RealmWidget(c) for c in holygrail.Grail().list_realms(all_realms=True)]
+        realm_list = [RealmWidget(c) for c in self.grail.list_realms(all_realms=True)]
         self.content = realm_list
         realm_list = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in realm_list])
         listbox = urwid.ListBox(realm_list)
@@ -610,6 +611,7 @@ class RealmList(object):
         self.position = 0
         self.frame = frame
         self.user_input = ""
+        self.grail = holygrail.Grail()
 
     def init_signals(self):
         louie.connect(self.update_realm_view,              "update_realm")
@@ -638,7 +640,7 @@ class RealmList(object):
         louie.send("set state", None, "realm")
 
     def fill_realm_view(self):
-        context_view = [RealmWidget(i, detailled=True) for i in holygrail.Grail().list_realms(all_realms=True)]
+        context_view = [RealmWidget(i, detailled=True) for i in self.grail.list_realms(all_realms=True)]
         if context_view:
             return urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in context_view])
         else:
@@ -705,7 +707,7 @@ class RealmList(object):
     @update_realm
     def get_new_realm(self):
         self.position += 1
-        holygrail.Grail().add_realm(self.user_input)
+        self.grail.add_realm(self.user_input)
 
     @update_realm
     def remove_realm(self):
@@ -718,7 +720,7 @@ class RealmList(object):
         # I can't delete a realm with mission, so move all the missions to the default realm
         if all_missions:
             for i in all_missions:
-                i.change_realm(holygrail.Grail().get_default_realm().id)
+                i.change_realm(self.grail.get_default_realm().id)
         realm.remove()
 
         self.frame.get_body().set_focus(self.position - 1)
