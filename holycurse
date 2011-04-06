@@ -13,6 +13,93 @@ def toggle_current_mission(func):
         args[0]._toggle_mission()
     return _toggle_current_mission
 
+def place_mission(func):
+    def _place_missions(*args):
+        mission = func(*args)
+        self = args[0]
+
+        # if empty list
+        if isinstance(self.content[-1], urwid.Text):
+            self.content.pop()
+            self.content.append(urwid.AttrMap(RealmWidget(mission.realm), None, 'reveal focus'))
+            self.content.append(urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
+            self.go_down()
+
+        # find the context where I want to add this mission
+        else:
+            it = 0
+            while it < len(self.content) and\
+                  not (isinstance(self.content[it].original_widget, RealmWidget) and\
+                       self.content[it].original_widget.realm == mission.realm):
+                it += 1
+            it += 1
+
+            # if I found it, append to it end
+            if it <= len(self.content):
+                while not isinstance(self.content[it].original_widget, urwid.Divider) and it < len(self.content) - 1:
+                    it += 1
+                if it == len(self.content) - 1:
+                    it += 1
+                self.content.insert(it, urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
+            else:
+                louie.send("update_main")
+
+
+    return _place_missions
+
+def place_due_mission(func):
+    def _place_due_missions(*args):
+        mission = func(*args)
+        self = args[0]
+
+        current_todo_due_date = mission.due
+        due_date = None
+        if current_todo_due_date:
+            for i, j in ((1,  "FOR TODAY"), (4,  "FOR IN 3 DAYS"), (8,  "FOR THIS WEEK")):
+                if current_todo_due_date < datetime.now() + timedelta(i):
+                    due_date = j
+                    break
+
+        current_todo_due_date = mission.due
+        # if empty list
+        if isinstance(self.content[-1], urwid.Text):
+            self.content.pop()
+            self.content.append(urwid.AttrMap(RealmWidget(mission.realm), None, 'reveal focus'))
+            self.content.append(urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
+            self.go_down()
+
+        elif mission.completed:
+            pass
+
+        # find the context where I want to add this mission
+        else:
+            it = 0
+            while it < len(self.content) and\
+                  not (isinstance(self.content[it].original_widget, SeparationWidget) and\
+                       self.content[it].original_widget.text == due_date):
+                it += 1
+            it += 1
+
+            # if I found it, append to it end
+            if it <= len(self.content):
+                while not isinstance(self.content[it].original_widget, urwid.Divider) and it < len(self.content) - 1:
+                    it += 1
+                if it == len(self.content) - 1:
+                    it += 1
+                self.content.insert(it, urwid.AttrMap(MissionWidget(mission), None, 'reveal focus'))
+            else:
+                louie.send("update_main")
+
+        current = self.frame.get_body().get_focus()[0].original_widget
+        if isinstance(current, urwid.Divider):
+            self.position -= 1
+            self.content.set_focus(self.position)
+        elif isinstance(current, SeparationWidget):
+            self.position += 1
+            self.content.set_focus(self.position)
+
+    return _place_due_missions
+
 def append_mission_to_current_group(func):
     def _append_mission_to_current_group(*args):
         mission = func(*args)
@@ -84,18 +171,15 @@ def remove_current_item(func):
     def _remove_current_item(*args):
         self = args[0]
         save_position = self.position
-        func(*args)
+        mission = func(*args)
         removed = self.content.pop(save_position)
-
-        #if isinstance(self.content[self.position].original_widget, urwid.Divider):
-            #self.go_down()
 
         # only one existing todo
         if len(self.content) == 1:
             # call usual update, the difference won't value to code some
             # specifique optimisations
             louie.send("update_main")
-            return
+            return mission
 
         ## at the end of the list
         elif len(self.content) <= self.position:
@@ -131,6 +215,12 @@ def remove_current_item(func):
 
         if removed.original_widget.mission.completed:
             self.refill_last_completed_missions()
+
+        if len(self.content) != 1 and isinstance(self._get_current_widget(), urwid.Divider):
+            self.position -= 1
+            self.content.set_focus(self.position)
+
+        return mission
 
     return _remove_current_item
 
@@ -200,12 +290,6 @@ class MissionWidget(urwid.Text):
 
         return display
 
-    def due_today(self, days):
-        if days == 1:
-            self.mission.due_for(datetime.today())
-        else:
-            self.mission.due_for(datetime.today() + timedelta(days))
-
     def get_realm(self):
         return self.mission.realm
 
@@ -261,32 +345,33 @@ class MainViewList(object):
         self.grail = holygrail.Grail()
 
     def init_signals(self):
-        louie.connect(self.update_main_view,               "update_main")
+        louie.connect(self.update_main_view,                          "update_main")
 
-        louie.connect(self.go_up,                          "k_main")
-        louie.connect(self.go_down,                        "j_main")
-        louie.connect(self.exit,                           "q_main")
-        louie.connect(self.command_line,                   ":_main")
-        louie.connect(self.tickle_one_day,                 "+_main")
-        louie.connect(self.tickle_3_hours,                 "=_main")
-        louie.connect(self.due_today,                      "t_main")
-        louie.connect(self.due_in_3_days,                  "T_main")
-        louie.connect(self.due_this_week,                  "w_main")
-        louie.connect(self.no_due,                         "W_main")
-        louie.connect(self.toggle_n_recreate,              "R_main")
-        louie.connect(self.toggle_mission,                 " _main")
-        louie.connect(self.remove_mission,                 "d_main")
+        louie.connect(self.go_up,                                     "k_main")
+        louie.connect(self.go_down,                                   "j_main")
+        louie.connect(self.exit,                                      "q_main")
+        louie.connect(self.command_line,                              ":_main")
+        louie.connect(self.tickle_one_day,                            "+_main")
+        louie.connect(self.tickle_3_hours,                            "=_main")
+        louie.connect(self.due_today,                                 "t_main")
+        louie.connect(self.due_in_3_days,                             "T_main")
+        louie.connect(self.due_this_week,                             "w_main")
+        louie.connect(self.no_due,                                    "W_main")
+        louie.connect(self.toggle_n_recreate,                         "R_main")
+        louie.connect(self.toggle_mission,                            " _main")
+        louie.connect(self.remove_mission,                            "d_main")
         self.update_realm_view = lambda : louie.send("update_realm")
-        louie.connect(self.update_realm_view,              "2_main")
-        louie.connect(self.add_mission_to_current_realm,   "a_main")
-        louie.connect(self.add_mission_to_default_realm,   "n_main")
-        louie.connect(self.add_completed_mission,          "c_main")
-        louie.connect(self.add_quest_to_current_mission,   "p_main")
-        louie.connect(self.swap_mission_to_quest,          "s_main")
-        louie.connect(self.rename_mission,                 "r_main")
-        louie.connect(self.update_main_view,               "U_main")
+        louie.connect(self.update_realm_view,                         "2_main")
+        louie.connect(self.add_mission_to_current_realm,              "a_main")
+        louie.connect(self.add_mission_to_current_realm_with_quest,   "A_main")
+        louie.connect(self.add_mission_to_default_realm,              "n_main")
+        louie.connect(self.add_completed_mission,                     "c_main")
+        louie.connect(self.add_quest_to_current_mission,              "p_main")
+        louie.connect(self.swap_mission_to_quest,                     "s_main")
+        louie.connect(self.rename_mission,                            "r_main")
+        louie.connect(self.update_main_view,                          "U_main")
 
-        louie.connect(self.get_user_input_main_view,       "enter_user_input_main")
+        louie.connect(self.get_user_input_main_view,                  "enter_user_input_main")
 
     def update_main_view(self):
         self.content = self.fill_main_view()
@@ -398,9 +483,21 @@ class MainViewList(object):
             self._get_current_mission().tickle(datetime.now() + timedelta(hours=3))
 
     @cant_be_call_on_empty_mainview
-    @update_main
     def due_today(self, days=1):
-        self.frame.get_body().get_focus()[0].original_widget.due_today(days)
+        mission = self._get_current_mission()
+        mission.due_for(datetime.today() + timedelta(days))
+        if mission.completed:
+            self._due_mission_completed(mission)
+        else:
+            self._due_mission(mission)
+
+    @place_due_mission
+    @remove_current_item
+    def _due_mission(self, mission):
+        return mission
+
+    def _due_mission_completed(self, mission):
+        self._get_current_widget().update()
 
     def due_in_3_days(self):
         self.due_today(4)
@@ -414,7 +511,7 @@ class MainViewList(object):
         self._get_current_mission().due_for(None)
 
     @cant_be_call_on_empty_mainview
-    @append_mission_to_current_group
+    @place_mission
     def toggle_n_recreate(self):
         mission = self._get_current_mission()
         self._toggle_mission()
@@ -477,6 +574,28 @@ class MainViewList(object):
 
         return self.grail.add_mission(self.user_input, realm=new_mission_realm, due=due_date)
 
+    @cant_be_call_on_empty_mainview
+    def add_mission_to_current_realm_with_quest(self):
+        self._wait_for_input("Mission description: ", self.get_current_realm_mission_with_quest)
+
+    @disconnect
+    @have_input
+    @append_mission_to_current_group
+    def get_current_realm_mission_with_quest(self):
+        new_mission_realm = self._get_current_mission().realm
+        new_mission_quest = self._get_current_mission().quest
+
+        current_todo_due_date = self._get_current_mission().due
+        due_date = None
+        if current_todo_due_date:
+            for i in (1, 4, 8):
+                if current_todo_due_date < datetime.now() + timedelta(i):
+                    due_date = datetime.now() + timedelta(i)
+                    new_mission_realm = None
+                    break
+
+        return holygrail.Grail().add_mission(self.user_input, realm=new_mission_realm, due=due_date, quest=new_mission_quest)
+
     def get_user_input_main_view(self):
         self.frame.set_focus('body')
         # debug
@@ -492,7 +611,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @update_main
+    @place_mission
     def get_default_realm_mission(self):
         self.grail.add_mission(self.user_input)
 
@@ -555,8 +674,11 @@ class MainViewList(object):
         louie.send("set state", None, "user_input_main")
         louie.connect(callback, "user_input_done")
 
+    def _get_current_widget(self):
+        return self.frame.get_body().get_focus()[0].original_widget
+
     def _get_current_mission(self):
-        return self.frame.get_body().get_focus()[0].original_widget.mission
+        return self._get_current_widget().mission
 
     def exit(self):
         raise urwid.ExitMainLoop()
