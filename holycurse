@@ -7,6 +7,25 @@ import holygrail
 
 from datetime import datetime, timedelta, date
 
+commands = {}
+
+def command(func, key, mode, doc):
+    louie.connect(func, "%s_%s" % (key, mode))
+    if doc:
+        if commands.has_key(mode):
+            commands[mode].append((key, doc))
+        else:
+            commands[mode] = [(key, doc)]
+
+def get_documentations():
+    for i in commands.keys():
+        yield urwid.AttrMap(urwid.Text(('header', "  %s" % i)), "header")
+        for a, b in commands[i]:
+            yield urwid.Text("%s : %s" % (a, b))
+        yield urwid.Divider(" ")
+    yield urwid.Text("For more informations/repport bugs go to http://blog.worlddomination.be/holyview")
+    yield urwid.Text("Thanks for using this software !")
+
 def toggle_current_mission(func):
     def _toggle_current_mission(*args):
         func(*args)
@@ -313,7 +332,7 @@ class RealmWidget(SeparationWidget):
         if self.detailled:
             if self.realm.default_realm:
                 text.append(("quest", " [default]"))
-            text.append(" (%i)" % len(self.realm.get_missions()))
+            text.append(" (%i)" % len(list(self.realm.get_missions())))
         if self.realm.hide:
             text.append(" - ")
             text.append(("date left", "HIDE"))
@@ -338,6 +357,42 @@ class State(object):
     def get(self):
         return self.state
 
+class HelpList(object):
+    def __init__(self, frame, state):
+        self.frame = frame
+        self.state = state
+        self.position = 0
+        self.init_signals()
+        self.previous_state = None
+
+    def init_signals(self):
+        command(self.exit,                  "q", "help", "return to previous view")
+        command(self.go_down,               "j" ,"help", "move the cursor down")
+        command(self.go_up,                 "k", "help", "move the cursor up")
+        command(self.go_down,               "down" ,"help", "move the cursor down")
+        command(self.go_up,                 "up", "help", "move the cursor up")
+
+    def exit(self):
+        louie.send("update_%s" % self.previous_state)
+
+    def fill_list(self):
+        self.content = [i for i in get_documentations()]
+        self.content = urwid.SimpleListWalker([urwid.AttrMap(i, None, 'reveal focus') for i in self.content])
+        self.frame.set_body(MyListBox(self.content))
+        if self.state.get() != "help":
+            self.previous_state = self.state.get()
+        self.state.set_state("help")
+
+    def go_down(self):
+        if self.position < (len(self.content) - 1):
+            self.position += 1
+            self.frame.get_body().set_focus(self.position)
+
+    def go_up(self):
+        if self.position > 0:
+            self.position -= 1
+            self.frame.get_body().set_focus(self.position)
+
 class MainViewList(object):
     def __init__(self, frame):
         self.position = 0
@@ -347,29 +402,29 @@ class MainViewList(object):
     def init_signals(self):
         louie.connect(self.update_main_view,                          "update_main")
 
-        louie.connect(self.go_up,                                     "k_main")
-        louie.connect(self.go_down,                                   "j_main")
-        louie.connect(self.exit,                                      "q_main")
-        louie.connect(self.command_line,                              ":_main")
-        louie.connect(self.tickle_one_day,                            "+_main")
-        louie.connect(self.tickle_3_hours,                            "=_main")
-        louie.connect(self.due_today,                                 "t_main")
-        louie.connect(self.due_in_3_days,                             "T_main")
-        louie.connect(self.due_this_week,                             "w_main")
-        louie.connect(self.no_due,                                    "W_main")
-        louie.connect(self.toggle_n_recreate,                         "R_main")
-        louie.connect(self.toggle_mission,                            " _main")
-        louie.connect(self.remove_mission,                            "d_main")
+        command(self.go_up,                                     "k", "main", "")
+        command(self.go_down,                                   "j", "main", "")
+        command(self.exit,                                      "q", "main", "")
+        command(self.command_line,                              ":", "main", "")
+        command(self.tickle_one_day,                            "+", "main", "")
+        command(self.tickle_3_hours,                            "=", "main", "")
+        command(self.due_today,                                 "t", "main", "")
+        command(self.due_in_3_days,                             "T", "main", "")
+        command(self.due_this_week,                             "w", "main", "")
+        command(self.no_due,                                    "W", "main", "")
+        command(self.toggle_n_recreate,                         "R", "main", "")
+        command(self.toggle_mission,                            " ", "main", "")
+        command(self.remove_mission,                            "d", "main", "")
         self.update_realm_view = lambda : louie.send("update_realm")
-        louie.connect(self.update_realm_view,                         "2_main")
-        louie.connect(self.add_mission_to_current_realm,              "a_main")
-        louie.connect(self.add_mission_to_current_realm_with_quest,   "A_main")
-        louie.connect(self.add_mission_to_default_realm,              "n_main")
-        louie.connect(self.add_completed_mission,                     "c_main")
-        louie.connect(self.add_quest_to_current_mission,              "p_main")
-        louie.connect(self.swap_mission_to_quest,                     "s_main")
-        louie.connect(self.rename_mission,                            "r_main")
-        louie.connect(self.update_main_view,                          "U_main")
+        command(self.update_realm_view,                         "2", "main", "")
+        command(self.add_mission_to_current_realm,              "a", "main", "")
+        command(self.add_mission_to_current_realm_with_quest,   "A", "main", "")
+        command(self.add_mission_to_default_realm,              "n", "main", "")
+        command(self.add_completed_mission,                     "c", "main", "")
+        command(self.add_quest_to_current_mission,              "p", "main", "")
+        command(self.swap_mission_to_quest,                     "s", "main", "")
+        command(self.rename_mission,                            "r", "main", "")
+        command(self.update_main_view,                          "U", "main", "")
 
         louie.connect(self.get_user_input_main_view,                  "enter_user_input_main")
 
@@ -388,9 +443,21 @@ class MainViewList(object):
         louie.send("set state", None, "main")
 
     def fill_main_view(self):
+        def D(string): open("DEBUG", "a").write("%s\n" % string)
+        #from time import time
+        #init = time()
+        #som = init
         super_main_view = self.grail.super_main_view()
+        #now = time()
+        #D(" ")
+        #D("get main view: %s" %  str(int(100 * (now - som))))
+        #som = now
         last_completed_missions = self.grail.last_completed_missions()
+        #now = time()
+        #D("get last completed: %s" % str(int(100 * (  now - som))))
+        #som = now
         if not super_main_view and not last_completed_missions:
+        #if not super_main_view:
             return urwid.SimpleListWalker([urwid.Text("You don't have any mission, press 'n' to create a new one")])
         main_view = []
         for i in super_main_view:
@@ -402,20 +469,27 @@ class MainViewList(object):
                 main_view.append(MissionWidget(j))
 
             main_view.append(urwid.Divider(" "))
+        #now = time()
+        #D("draw main view %s" %str(int(100 * (  now - som))))
+        #som = now
 
         if last_completed_missions:
             main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
             for i in last_completed_missions:
-                if a > 4:
-                    break
-                a += 1
                 main_view.append(MissionWidget(i))
         else:
             main_view.pop()
+        #now = time()
+        #D("draw last completed %s" %str(int(100 * (  now - som))))
+        #som = now
 
         to_return = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in main_view])
+        #now = time()
+        #D("create the simplelistwalker %s" %str(int(100 * (  now - som))))
+        #som = now
 
         to_return.set_focus(1)
+        #D("total: %s" %str(int(100 * (  time() - init))))
         return to_return
 
     def refill_last_completed_missions(self):
@@ -514,7 +588,7 @@ class MainViewList(object):
     @place_mission
     def toggle_n_recreate(self):
         mission = self._get_current_mission()
-        self._toggle_mission()
+        self._toggle_mission(mission)
         return self.grail.add_mission(mission.description, quest=mission.quest, realm=mission.realm)
 
     @cant_be_call_on_empty_mainview
@@ -530,15 +604,16 @@ class MainViewList(object):
             if mission.quest:
                 self.add_new_mission_to_quest()
             else:
-                self._toggle_mission()
+                self._toggle_mission(mission)
         else:
             mission.toggle()
             louie.send("update_main")
 
     @remove_current_item
     @add_to_completed_task
-    def _toggle_mission(self):
-        mission = self._get_current_mission()
+    def _toggle_mission(self, mission=None):
+        if not mission:
+            mission = self._get_current_mission()
         mission.toggle()
         return mission
 
@@ -611,7 +686,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @place_mission
+    #@place_mission
     def get_default_realm_mission(self):
         self.grail.add_mission(self.user_input)
 
@@ -692,10 +767,10 @@ class ChooseRealmList(object):
         self.grail = holygrail.Grail()
 
     def init_signals(self):
-        louie.connect(self.chose_realm,                    "C_main")
-        louie.connect(self.go_up,                          "k_chose_realm")
-        louie.connect(self.go_down,                        "j_chose_realm")
-        louie.connect(self.return_to_main_view,            "q_chose_realm")
+        command(self.chose_realm,                    "C",           "main", "")
+        command(self.go_up,                          "k",           "chose_realm", "")
+        command(self.go_down,                        "j",           "chose_realm", "")
+        command(self.return_to_main_view,            "q",           "chose_realm", "")
         louie.connect(self.select_realm,                   "enter_chose_realm")
 
     def chose_realm(self):
@@ -739,18 +814,18 @@ class RealmList(object):
         louie.connect(self.update_realm_view,              "update_realm")
 
         self.update_main_view = lambda : louie.send("update_main")
-        louie.connect(self.update_main_view,               "1_realm")
-        louie.connect(self.go_up,                          "k_realm")
-        louie.connect(self.go_down,                        "j_realm")
-        louie.connect(self.move_up_realm,                  "K_realm")
-        louie.connect(self.move_down_realm,                "J_realm")
-        louie.connect(self.toggle_realm_hide,              " _realm")
-        louie.connect(self.exit,                           "q_realm")
-        louie.connect(self.rename_realm,                   "r_realm")
-        louie.connect(self.add_new_realm,                  "a_realm")
-        louie.connect(self.add_new_realm,                  "n_realm")
-        louie.connect(self.remove_realm,                   "d_realm")
-        louie.connect(self.update_realm_view,              "U_realm")
+        command(self.update_main_view,               "1", "realm", "")
+        command(self.go_up,                          "k", "realm", "")
+        command(self.go_down,                        "j", "realm", "")
+        command(self.move_up_realm,                  "K", "realm", "")
+        command(self.move_down_realm,                "J", "realm", "")
+        command(self.toggle_realm_hide,              " ", "realm", "")
+        command(self.exit,                           "q", "realm", "")
+        command(self.rename_realm,                   "r", "realm", "")
+        command(self.add_new_realm,                  "a", "realm", "")
+        command(self.add_new_realm,                  "n", "realm", "")
+        command(self.remove_realm,                   "d", "realm", "")
+        command(self.update_realm_view,              "U", "realm", "")
 
         louie.connect(self.get_user_input_realm,           "enter_user_input_realm")
 
@@ -870,6 +945,7 @@ class Window(object):
         self.main_view.get_main_view()
         self.realm_view = RealmList(self.frame)
         self.choose_realm = ChooseRealmList(self.frame, self.main_view)
+        self.help = HelpList(self.frame, self.main_view)
 
         self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
         self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', "I am before command line")), "header"), urwid.Edit("", "")])
@@ -903,6 +979,7 @@ class Window(object):
         self.main_view.init_signals()
         self.realm_view.init_signals()
         self.choose_realm.init_signals()
+        self.help.init_signals()
 
         louie.connect(self.show_key.set_text,              "show key")
 
