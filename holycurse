@@ -831,6 +831,8 @@ class RealmList(object):
         command(self.add_new_realm,                  "n", "realm", "")
         command(self.remove_realm,                   "d", "realm", "")
         command(self.update_realm_view,              "U", "realm", "")
+        self.get_help = lambda : louie.send("help")
+        command(self.get_help,                                  "?", "realm", "")
 
         louie.connect(self.get_user_input_realm,           "enter_user_input_realm")
 
