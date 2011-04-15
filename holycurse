@@ -23,7 +23,7 @@ def get_documentations():
         for a, b in commands[i]:
             yield urwid.Text("%s : %s" % (a, b))
         yield urwid.Divider(" ")
-    yield urwid.Text("For more informations/repport bugs go to http://blog.worlddomination.be/holyview")
+    yield urwid.Text("For more informations/repport bugs go to http://blog.worlddomination.be/holycurse")
     yield urwid.Text("Thanks for using this software !")
 
 def toggle_current_mission(func):
