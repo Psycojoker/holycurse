@@ -7,6 +7,10 @@ import holygrail
 
 from datetime import datetime, timedelta, date
 
+class MyListBox(urwid.ListBox):
+    def keypress(self, size, key):
+        return key
+
 commands = {}
 
 def command(func, key, mode, doc):
@@ -380,8 +384,7 @@ class HelpList(object):
     def fill_list(self):
         self.content = [i for i in get_documentations()]
         self.content = urwid.SimpleListWalker([urwid.AttrMap(i, None, 'reveal focus') for i in self.content])
-        self.frame.set_body(urwid.ListBox(self.content))
-        #self.frame.set_body(MyListBox(self.content))
+        self.frame.set_body(MyListBox(self.content))
         if self.state.get() != "help":
             self.previous_state = self.state.get()
         self.state.set_state("help")
@@ -435,7 +438,7 @@ class MainViewList(object):
 
     def update_main_view(self):
         self.content = self.fill_main_view()
-        self.listbox = urwid.ListBox(self.content)
+        self.listbox = MyListBox(self.content)
         self.frame.set_body(self.listbox)
         self.content.set_focus(self.position)
         if isinstance(self.frame.get_body().get_focus()[0], urwid.Text):
@@ -782,7 +785,7 @@ class ChooseRealmList(object):
         realm_list = [RealmWidget(c) for c in self.grail.list_realms(all_realms=True)]
         self.content = realm_list
         realm_list = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in realm_list])
-        listbox = urwid.ListBox(realm_list)
+        listbox = MyListBox(realm_list)
         listbox.set_focus(self.position)
         self.frame.set_body(listbox)
         louie.send("set state", None, "chose_realm")
@@ -838,7 +841,7 @@ class RealmList(object):
 
     def update_realm_view(self):
         self.content = self.fill_realm_view()
-        self.listbox = urwid.ListBox(self.content)
+        self.listbox = MyListBox(self.content)
         self.frame.set_body(self.listbox)
         self.content.set_focus(self.position)
         louie.send("set state", None, "realm")
