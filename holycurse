@@ -420,7 +420,7 @@ class MainViewList(object):
         command(self.no_due,                                    "W", "main", "remove the due date of the current mission")
         command(self.toggle_n_recreate,                         "R", "main", "set has completed the current mission and recreate a misison in the same realm with the same description and same quest")
         command(self.toggle_mission,                            " ", "main", "toggle the completion state of the current mission")
-        #command(self.remove_mission,                            "d", "main", "")
+        command(self.remove_mission,                            "d", "main", "")
         self.update_realm_view = lambda : louie.send("update_realm")
         command(self.update_realm_view,                         "2", "main", "go to realm view")
         command(self.add_mission_to_current_realm,              "a", "main", "add a new mission in the current realm")
