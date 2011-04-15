@@ -773,9 +773,9 @@ class ChooseRealmList(object):
         self.grail = holygrail.Grail()
 
     def init_signals(self):
-        command(self.go_up,                          "k",           "chose_realm", "")
-        command(self.go_down,                        "j",           "chose_realm", "")
-        command(self.return_to_main_view,            "q",           "chose_realm", "")
+        command(self.go_up,                          "k",           "chose_realm", "move down in the realm list")
+        command(self.go_down,                        "j",           "chose_realm", "move up in the realm list")
+        command(self.return_to_main_view,            "q",           "chose_realm", "return to the main view")
         louie.connect(self.select_realm,                   "enter_chose_realm")
 
     def chose_realm(self):
