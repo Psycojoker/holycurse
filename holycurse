@@ -430,6 +430,7 @@ class MainViewList(object):
         command(self.update_main_view,                          "U", "main", "")
         self.get_help = lambda : louie.send("help")
         command(self.get_help,                                  "?", "main", "")
+        command(self.chose_realm,                               "C", "main", "")
 
         louie.connect(self.get_user_input_main_view,                  "enter_user_input_main")
 
@@ -772,7 +773,6 @@ class ChooseRealmList(object):
         self.grail = holygrail.Grail()
 
     def init_signals(self):
-        command(self.chose_realm,                    "C",           "main", "")
         command(self.go_up,                          "k",           "chose_realm", "")
         command(self.go_down,                        "j",           "chose_realm", "")
         command(self.return_to_main_view,            "q",           "chose_realm", "")
