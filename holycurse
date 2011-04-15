@@ -776,7 +776,7 @@ class ChooseRealmList(object):
         command(self.go_up,                          "k",           "chose_realm", "move down in the realm list")
         command(self.go_down,                        "j",           "chose_realm", "move up in the realm list")
         command(self.return_to_main_view,            "q",           "chose_realm", "return to the main view")
-        command(self.select_realm,                   "enter",       "chose_realm", "")
+        command(self.select_realm,                   "enter",       "chose_realm", "chose the current realm")
 
     def chose_realm(self):
         realm_list = [RealmWidget(c) for c in self.grail.list_realms(all_realms=True)]
