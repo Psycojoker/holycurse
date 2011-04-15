@@ -372,13 +372,16 @@ class HelpList(object):
         command(self.go_down,               "down" ,"help", "move the cursor down")
         command(self.go_up,                 "up", "help", "move the cursor up")
 
+        louie.connect(self.fill_list, "help")
+
     def exit(self):
         louie.send("update_%s" % self.previous_state)
 
     def fill_list(self):
         self.content = [i for i in get_documentations()]
         self.content = urwid.SimpleListWalker([urwid.AttrMap(i, None, 'reveal focus') for i in self.content])
-        self.frame.set_body(MyListBox(self.content))
+        self.frame.set_body(urwid.ListBox(self.content))
+        #self.frame.set_body(MyListBox(self.content))
         if self.state.get() != "help":
             self.previous_state = self.state.get()
         self.state.set_state("help")
@@ -425,6 +428,8 @@ class MainViewList(object):
         command(self.swap_mission_to_quest,                     "s", "main", "")
         command(self.rename_mission,                            "r", "main", "")
         command(self.update_main_view,                          "U", "main", "")
+        self.get_help = lambda : louie.send("help")
+        command(self.get_help,                                  "?", "main", "")
 
         louie.connect(self.get_user_input_main_view,                  "enter_user_input_main")
 
@@ -937,7 +942,7 @@ class Window(object):
     def __init__(self):
         self.state = State(set(("main", "command", "realm", "user_input",
                                 "chose_realm", "user_input_main",
-                                "user_input_realm")), "main")
+                                "user_input_realm", "help")), "main")
 
         self.frame = urwid.Frame(urwid.Text(""))
 
@@ -945,7 +950,7 @@ class Window(object):
         self.main_view.get_main_view()
         self.realm_view = RealmList(self.frame)
         self.choose_realm = ChooseRealmList(self.frame, self.main_view)
-        self.help = HelpList(self.frame, self.main_view)
+        self.help = HelpList(self.frame, self.state)
 
         self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
         self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', "I am before command line")), "header"), urwid.Edit("", "")])
