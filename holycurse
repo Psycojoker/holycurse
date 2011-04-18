@@ -537,19 +537,15 @@ class MainViewList(object):
     @cant_be_call_on_empty_mainview
     def go_down(self):
         self.frame.get_body().set_focus(self.position + 1)
-        louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, urwid.Divider):
             self.frame.get_body().set_focus(self.position + 3)
-            louie.send("show key", None, "Gotcha !")
 
     @cant_be_call_on_empty_mainview
     def go_up(self):
         if self.position > 1:
             self.frame.get_body().set_focus(self.position - 1)
-            louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
             if isinstance(self.frame.get_body().get_focus()[0].original_widget, SeparationWidget):
                 self.frame.get_body().set_focus(self.position - 3)
-                louie.send("show key", None, "Gotcha !")
 
     def command_line(self):
         self.frame.set_focus('footer')
@@ -686,7 +682,6 @@ class MainViewList(object):
     def get_user_input_main_view(self):
         self.frame.set_focus('body')
         # debug
-        louie.send("show key", None, "Mission description: " + self.frame.footer.get_focus().edit_text)
         self.user_input = self.frame.footer.get_focus().edit_text
         self.frame.footer.get_focus().edit_text = ""
         self.frame.footer.get_focus().set_caption("")
@@ -804,13 +799,11 @@ class ChooseRealmList(object):
         if self.position < (len(self.content) - 1):
             self.frame.get_body().set_focus(self.position + 1)
             self.position += 1
-            louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     def go_up(self):
         if self.position > 0:
             self.frame.get_body().set_focus(self.position - 1)
             self.position -= 1
-            louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     @update_main
     def select_realm(self):
@@ -866,13 +859,11 @@ class RealmList(object):
         if self.position < (len(self.content) - 1):
             self.position += 1
             self.frame.get_body().set_focus(self.position)
-            louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     def go_up(self):
         if self.position > 0:
             self.position -= 1
             self.frame.get_body().set_focus(self.position)
-            louie.send("show key", None, "Current: %s" % self.frame.get_body().get_focus()[0].original_widget)
 
     @update_realm
     def move_down_realm(self):
@@ -907,7 +898,6 @@ class RealmList(object):
     def get_user_input_realm(self):
         self.frame.set_focus('body')
         # debug
-        louie.send("show key", None, "Realm description: " + self.frame.get_footer().get_focus().edit_text)
         self.user_input = self.frame.get_footer().get_focus().edit_text
         self.frame.get_footer().get_focus().edit_text = ""
         self.frame.get_footer().get_focus().set_caption("")
@@ -965,9 +955,9 @@ class Window(object):
         self.choose_realm = ChooseRealmList(self.frame, self.main_view)
         self.help = HelpList(self.frame, self.state)
 
-        self.show_key = urwid.Text("HolyGrail 0.1", wrap='clip')
+        self.header = urwid.Text("HolyGrail 0.1", wrap='clip')
         self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', "I am before command line")), "header"), urwid.Edit("", "")])
-        self.frame.set_header(urwid.AttrMap(self.show_key, 'header'))
+        self.frame.set_header(urwid.AttrMap(self.header, 'header'))
         self.frame.set_footer(self.footer)
 
         palette = [('header', 'white', 'dark red'),
@@ -999,8 +989,6 @@ class Window(object):
         self.choose_realm.init_signals()
         self.help.init_signals()
 
-        louie.connect(self.show_key.set_text,              "show key")
-
         louie.connect(self.get_command,                    "enter_command")
 
         louie.connect(self.get_user_input,                 "enter_user_input")
@@ -1011,20 +999,16 @@ class Window(object):
     def manage_input(self, input):
         if self.get_state() == "main":
             self.main_view.position = self.frame.get_body().get_focus()[1]
-        if not louie.send("%s_%s" % (input, self.get_state())):
-            # tuple == mouse input
-            self.show_key.set_text(input if not isinstance(input, tuple) else "%s, %s, %s, %s" % input)
+        louie.send("%s_%s" % (input, self.get_state()))
 
     def get_command(self):
         self.frame.set_focus('body')
-        self.show_key.set_text("User input: " + self.footer.get_focus().edit_text[1:])
         self.footer.get_focus().edit_text = ""
         louie.send("set state", None, "main")
 
     def get_user_input(self):
         self.frame.set_focus('body')
         # debug
-        self.show_key.set_text("Mission description: " + self.footer.get_focus().edit_text)
         self.user_input = self.footer.get_focus().edit_text
         self.footer.get_focus().edit_text = ""
         self.footer.get_focus().set_caption("")
