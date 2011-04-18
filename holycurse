@@ -956,7 +956,7 @@ class Window(object):
         self.help = HelpList(self.frame, self.state)
 
         self.header = urwid.Text("HolyGrail 0.1", wrap='clip')
-        self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', "I am before command line")), "header"), urwid.Edit("", "")])
+        self.footer = urwid.Pile([urwid.AttrMap(urwid.Text(('header', 'To see help press "?"')), "header"), urwid.Edit("", "")])
         self.frame.set_header(urwid.AttrMap(self.header, 'header'))
         self.frame.set_footer(self.footer)
 
