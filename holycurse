@@ -375,6 +375,8 @@ class HelpList(object):
         command(self.go_up,                 "k", "help", "move the cursor up")
         command(self.go_down,               "down" ,"help", "move the cursor down")
         command(self.go_up,                 "up", "help", "move the cursor up")
+        command(self.go_down,               "down" ,"help", "move the cursor down")
+        command(self.go_up,                 "up", "help", "move the cursor up")
 
         louie.connect(self.fill_list, "help")
 
@@ -410,6 +412,8 @@ class MainViewList(object):
 
         command(self.go_up,                                     "k", "main", "go up in the main view")
         command(self.go_down,                                   "j", "main", "go down in the main view")
+        command(self.go_up,                                     "up", "main", "go up in the main view")
+        command(self.go_down,                                   "down", "main", "go down in the main view")
         command(self.exit,                                      "q", "main", "quit holycurse")
         command(self.command_line,                              ":", "main", "enter command line mode, useless right now")
         command(self.tickle_one_day,                            "+", "main", "tickle the current mission for one")
@@ -777,6 +781,8 @@ class ChooseRealmList(object):
     def init_signals(self):
         command(self.go_up,                          "k",     "chose_realm", "move down in the realm list")
         command(self.go_down,                        "j",     "chose_realm", "move up in the realm list")
+        command(self.go_up,                          "up",    "chose_realm", "move down in the realm list")
+        command(self.go_down,                        "down",  "chose_realm", "move up in the realm list")
         command(self.return_to_main_view,            "q",     "chose_realm", "return to the main view")
         command(self.select_realm,                   "enter", "chose_realm", "chose the current realm")
         command(self.chose_realm,                    "C",     "main", "enter chose mode to select a new realm for the current mission")
@@ -825,6 +831,8 @@ class RealmList(object):
         command(self.update_main_view,                          "1", "realm", "go to the main view")
         command(self.go_up,                                     "k", "realm", "go up in the realm list")
         command(self.go_down,                                   "j", "realm", "go down in the realm list")
+        command(self.go_up,                                     "up", "realm", "go up in the realm list")
+        command(self.go_down,                                   "down", "realm", "go down in the realm list")
         command(self.move_up_realm,                             "K", "realm", "move up the current realm")
         command(self.move_down_realm,                           "J", "realm", "move down the current realm")
         command(self.toggle_realm_hide,                         " ", "realm", "toggle the hidden state of the current realm")
