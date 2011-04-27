@@ -666,7 +666,7 @@ class MainViewList(object):
     @append_mission_to_current_group
     def get_current_realm_mission_with_quest(self):
         new_mission_realm = self._get_current_mission().realm
-        new_mission_quest = self._get_current_mission().quest
+        new_mission_quest = self._get_current_mission().quest.id
 
         current_todo_due_date = self._get_current_mission().due
         due_date = None
