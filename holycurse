@@ -634,7 +634,7 @@ class MainViewList(object):
     @append_mission_to_current_group
     def get_next_mission_to_quest(self):
         old_mission = self._get_current_mission()
-        return self.grail.add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id)
+        return self.grail.add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id, due=old_mission.due)
 
     @cant_be_call_on_empty_mainview
     def add_mission_to_current_realm(self):
