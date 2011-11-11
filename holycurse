@@ -577,13 +577,13 @@ class MainViewList(object):
         louie.send("set state", None, "command")
 
     @cant_be_call_on_empty_mainview
-    @remove_current_item
+    @update_main
     def tickle_one_day(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self._get_current_mission().tickle(datetime.now() + timedelta(days=1))
 
     @cant_be_call_on_empty_mainview
-    @remove_current_item
+    @update_main
     def tickle_3_hours(self):
         if isinstance(self.frame.get_body().get_focus()[0].original_widget, MissionWidget):
             self._get_current_mission().tickle(datetime.now() + timedelta(hours=3))
@@ -597,8 +597,7 @@ class MainViewList(object):
         else:
             self._due_mission(mission)
 
-    @place_due_mission
-    @remove_current_item
+    @update_main
     def _due_mission(self, mission):
         return mission
 
@@ -617,14 +616,14 @@ class MainViewList(object):
         self._get_current_mission().due_for(None)
 
     @cant_be_call_on_empty_mainview
-    @place_mission
+    @update_main
     def toggle_n_recreate(self):
         mission = self._get_current_mission()
         self._toggle_mission(mission)
         return self.grail.add_mission(mission.description, quest=mission.quest, realm=mission.realm)
 
     @cant_be_call_on_empty_mainview
-    @remove_current_item
+    @update_main
     def remove_mission(self):
         self._get_current_mission().remove()
 
@@ -649,8 +648,9 @@ class MainViewList(object):
             mission.toggle()
             louie.send("update_main")
 
-    @remove_current_item
-    @add_to_completed_task
+    #@remove_current_item
+    #@add_to_completed_task
+    @update_main
     def _toggle_mission(self, mission=None):
         if not mission:
             mission = self._get_current_mission()
@@ -663,7 +663,7 @@ class MainViewList(object):
     @disconnect
     @toggle_current_mission
     @have_input
-    @append_mission_to_current_group
+    @update_main
     def get_next_mission_to_quest(self):
         old_mission = self._get_current_mission()
         return self.grail.add_mission(self.user_input, realm=old_mission.realm.id, quest=old_mission.quest.id, due=old_mission.due)
@@ -674,7 +674,8 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @append_mission_to_current_group
+    #@append_mission_to_current_group
+    @update_main
     def get_current_realm_mission(self):
         new_mission_realm = self._get_current_mission().realm
 
@@ -695,7 +696,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @append_mission_to_current_group
+    @update_main
     def get_current_realm_mission_with_quest(self):
         new_mission_realm = self._get_current_mission().realm
         new_mission_quest = self._get_current_mission().quest.id
@@ -726,6 +727,7 @@ class MainViewList(object):
     @disconnect
     @have_input
     #@place_mission
+    @update_main
     def get_default_realm_mission(self):
         self.grail.add_mission(self.user_input)
 
@@ -734,7 +736,7 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    @add_to_completed_task
+    @update_main
     def get_completed_mission(self):
         new_mission = self.grail.add_mission(self.user_input)
         new_mission.toggle()
