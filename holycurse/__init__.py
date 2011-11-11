@@ -1,0 +1,1 @@
+from holycurse import HolyCurse

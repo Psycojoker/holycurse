@@ -1,24 +1,6 @@
 #!/usr/bin/python
 # -*- coding:Utf-8 -*-
 
-#!/usr/bin/python
-# -*- coding:Utf-8 -*-
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# Copyright (C) 2011  Laurent Peuch  <cortex@worlddomination.be>
-
 import urwid
 import louie
 import holygrail
@@ -974,7 +956,7 @@ class RealmList(object):
         louie.send("set state", None, "user_input_realm")
         louie.connect(callback, "user_input_done")
 
-class Window(object):
+class HolyCurse(object):
 
     def __init__(self):
         self.state = State(set(("main", "command", "realm", "user_input",
@@ -1050,5 +1032,3 @@ class Window(object):
         louie.send("set state", None, "main")
         louie.send("user_input_done")
 
-if __name__ == "__main__":
-    Window().run()
