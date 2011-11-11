@@ -312,11 +312,14 @@ class MissionWidget(urwid.Text):
                     return "%s minutes" % (minutes)
 
         display = ["   "]
-        old = date.today() - self.mission.created_at
-        if (old.days - 1)/7 > 0:
-            display.append(("old", "|"*((old.days - 1)/7)))
-            display.append(" ")
-        display.append("%s" % self.mission.description)
+        if self.mission.active:
+            old = date.today() - self.mission.created_at
+            if (old.days - 1)/7 > 0:
+                display.append(("old", "|"*((old.days - 1)/7)))
+                display.append(" ")
+            display.append("%s" % self.mission.description)
+        else:
+            display.append(("unactive", "%s" % self.mission.description))
         if self.mission.quest:
             display.append(" ")
             display.append(("quest", "[%s]" % self.mission.quest.description))
@@ -423,6 +426,7 @@ class MainViewList(object):
     def __init__(self, frame):
         self.position = 0
         self.frame = frame
+        self.unactive = True
         self.grail = holygrail.Grail()
 
     def init_signals(self):
@@ -453,6 +457,8 @@ class MainViewList(object):
         command(self.swap_mission_to_quest,                     "s", "main", "swap the current mission to a quest and add a new mission to this quest")
         command(self.rename_mission,                            "r", "main", "rename the current mission")
         command(self.update_main_view,                          "U", "main", "update the main view")
+        command(self.toggle_active_mission,                     "u", "main", "toggle the active state of the current mission")
+        command(self.toggle_showing_unactive_missions,          "z", "main", "toggle the display of unactive missions")
         self.get_help = lambda : louie.send("help")
         command(self.get_help,                                  "?", "main", "show help")
 
@@ -477,7 +483,7 @@ class MainViewList(object):
         #from time import time
         #init = time()
         #som = init
-        super_main_view = self.grail.super_main_view()
+        super_main_view = self.grail.super_main_view(unactive=self.unactive)
         #now = time()
         #D(" ")
         #D("get main view: %s" %  str(int(100 * (now - som))))
@@ -621,6 +627,14 @@ class MainViewList(object):
     @remove_current_item
     def remove_mission(self):
         self._get_current_mission().remove()
+
+    @update_main
+    def toggle_active_mission(self):
+        self._get_current_mission().toggle_active()
+
+    @update_main
+    def toggle_showing_unactive_missions(self):
+        self.unactive = not self.unactive
 
     @cant_be_call_on_empty_mainview
     def toggle_mission(self):
@@ -985,6 +999,7 @@ class Window(object):
                    ('old', 'yellow', '', 'bold'),
                    ('date left', 'black', 'light cyan'),
                    ('date late', 'yellow', 'dark magenta'),
+                   ('unactive', 'light blue', ''),
                    ('mission', 'light gray', '')]
 
         self.loop = urwid.MainLoop(self.frame, palette,
