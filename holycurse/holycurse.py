@@ -7,19 +7,11 @@ import holygrail
 
 from datetime import datetime, timedelta, date
 
+from controler import commands, command
+
 class MyListBox(urwid.ListBox):
     def keypress(self, size, key):
         return key
-
-commands = {}
-
-def command(func, key, mode, doc):
-    louie.connect(func, "%s_%s" % (key, mode))
-    if doc:
-        if commands.has_key(mode):
-            commands[mode].append((key, doc))
-        else:
-            commands[mode] = [(key, doc)]
 
 def get_documentations():
     for i in commands.keys():
