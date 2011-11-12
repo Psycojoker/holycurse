@@ -118,20 +118,9 @@ class MainViewList(object):
 
     def fill_main_view(self):
         def D(string): open("DEBUG", "a").write("%s\n" % string)
-        #from time import time
-        #init = time()
-        #som = init
         super_main_view = self.grail.super_main_view(unactive=self.unactive)
-        #now = time()
-        #D(" ")
-        #D("get main view: %s" %  str(int(100 * (now - som))))
-        #som = now
         last_completed_missions = self.grail.last_completed_missions()
-        #now = time()
-        #D("get last completed: %s" % str(int(100 * (  now - som))))
-        #som = now
         if not super_main_view and not last_completed_missions:
-        #if not super_main_view:
             return urwid.SimpleListWalker([urwid.Text("You don't have any mission, press 'n' to create a new one")])
         main_view = []
         for i in super_main_view:
@@ -143,9 +132,6 @@ class MainViewList(object):
                 main_view.append(MissionWidget(j))
 
             main_view.append(urwid.Divider(" "))
-        #now = time()
-        #D("draw main view %s" %str(int(100 * (  now - som))))
-        #som = now
 
         if last_completed_missions:
             main_view.append(SeparationWidget("LAST COMPLETED MISSIONS"))
@@ -153,17 +139,10 @@ class MainViewList(object):
                 main_view.append(MissionWidget(i))
         else:
             main_view.pop()
-        #now = time()
-        #D("draw last completed %s" %str(int(100 * (  now - som))))
-        #som = now
 
         to_return = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'reveal focus') for w in main_view])
-        #now = time()
-        #D("create the simplelistwalker %s" %str(int(100 * (  now - som))))
-        #som = now
 
         to_return.set_focus(1)
-        #D("total: %s" %str(int(100 * (  time() - init))))
         return to_return
 
     def refill_last_completed_missions(self):
@@ -286,8 +265,6 @@ class MainViewList(object):
             mission.toggle()
             louie.send("update_main")
 
-    #@remove_current_item
-    #@add_to_completed_task
     @update_main
     def _toggle_mission(self, mission=None):
         if not mission:
@@ -312,7 +289,6 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    #@append_mission_to_current_group
     @update_main
     def get_current_realm_mission(self):
         new_mission_realm = self._get_current_mission().realm
@@ -364,7 +340,6 @@ class MainViewList(object):
 
     @disconnect
     @have_input
-    #@place_mission
     @update_main
     def get_default_realm_mission(self):
         self.grail.add_mission(self.user_input)
