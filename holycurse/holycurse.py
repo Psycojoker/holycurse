@@ -7,18 +7,9 @@ import holygrail
 
 from datetime import datetime, timedelta
 
-from controler import commands, command, State
+from controler import command, State, get_documentations
 from widgets import MissionWidget, SeparationWidget, RealmWidget, MyListBox
 from shortcuts import cant_be_call_on_empty_mainview, disconnect, update_main, toggle_current_mission, have_input, update_current_item, update_realm
-
-def get_documentations():
-    for i in commands.keys():
-        yield urwid.AttrMap(urwid.Text(('header', "  %s" % i)), "header")
-        for a, b in commands[i]:
-            yield urwid.Text("%s : %s" % (a, b))
-        yield urwid.Divider(" ")
-    yield urwid.Text("For more informations/repport bugs go to http://blog.worlddomination.be/holycurse")
-    yield urwid.Text("Thanks for using this software !")
 
 class HelpList(object):
     def __init__(self, frame, state):

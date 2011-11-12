@@ -1,4 +1,5 @@
 import louie
+import urwid
 
 commands = {}
 
@@ -25,3 +26,12 @@ class State(object):
 
     def get(self):
         return self.state
+
+def get_documentations():
+    for i in commands.keys():
+        yield urwid.AttrMap(urwid.Text(('header', "  %s" % i)), "header")
+        for a, b in commands[i]:
+            yield urwid.Text("%s : %s" % (a, b))
+        yield urwid.Divider(" ")
+    yield urwid.Text("For more informations/repport bugs go to http://blog.worlddomination.be/holycurse")
+    yield urwid.Text("Thanks for using this software !")
